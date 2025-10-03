@@ -2,9 +2,10 @@ package service
 
 import (
 	"context"
+	"flight/modules/admin/repo"
 	"flight/modules/user/entity"
 	"flight/modules/user/queryparams"
-	"flight/modules/user/repo"
+	userRepo "flight/modules/user/repo"
 	"flight/pkg/apperror"
 	"flight/pkg/constant"
 	"flight/pkg/jwttoken"
@@ -14,43 +15,24 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserService interface {
-	GetUserById(ctx context.Context, id int) (*entity.User, error)
+type AdminService interface {
 	GetUsers(ctx context.Context, queryParams queryparams.QueryParams) (*pagination.Pagination, error)
-	UpdateUserById(ctx context.Context, user entity.User) error
-	DeleteUserById(ctx context.Context, id int) error
-	Login(ctx context.Context, userAuth entity.User) (string, error)
-	Register(ctx context.Context, user entity.User) error
-	UpdatePassword(ctx context.Context, user entity.User) error 
 }
 
-type UserServiceImpl struct {
-	r repo.UserRepo
+type AdminServiceImpl struct {
+	ar repo.AdminRepo
+	ur userRepo.UserRepo
 }
 
-func NewUserService(r repo.UserRepo) UserServiceImpl {
-	return UserServiceImpl{
-		r: r,
+func NewUserService(adminRepo repo.AdminRepo, userRepo userRepo.UserRepo) AdminServiceImpl {
+	return AdminServiceImpl{
+		ar: adminRepo,
+		ur: userRepo,
 	}
 }
 
-func (s UserServiceImpl) GetUserById(ctx context.Context, id int) (*entity.User, error) {
-	isUserExist := s.r.IsUserExists(ctx, id)
-	if !isUserExist {
-		return nil, apperror.NewErrStatusBadRequest(constant.GET_USER_BY_ID, apperror.ErrUserNotExists, apperror.ErrUserNotExists)
-	}
-
-	user, err := s.r.GetUserById(ctx, id)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return user, nil
-}
-
-func (u UserServiceImpl) GetUsers(ctx context.Context, queryParams queryparams.QueryParams) (*pagination.Pagination, error) {
-	totalUser, err := u.r.GetTotalUser(ctx)
+func (u AdminServiceImpl) GetUsers(ctx context.Context, queryParams queryparams.QueryParams) (*pagination.Pagination, error) {
+	totalUser, err := u.ur.GetTotalUser(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +44,7 @@ func (u UserServiceImpl) GetUsers(ctx context.Context, queryParams queryparams.Q
 	}
 	queryparams.CheckPage(&queryParams, totalPage)
 
-	users, err := u.r.GetUsers(ctx, queryParams)
+	users, err := u.ur.GetUsers(ctx, queryParams)
 	if err != nil {
 		return nil, err
 	}
@@ -77,46 +59,19 @@ func (u UserServiceImpl) GetUsers(ctx context.Context, queryParams queryparams.Q
 	return &pagination, nil
 }
 
-func (u UserServiceImpl) UpdateUserById(ctx context.Context, user entity.User) error {
-	isUserExists := u.r.IsUserExists(ctx, user.Id)
-	if !isUserExists {
-		return apperror.NewErrStatusBadRequest(constant.UPDATE_USER_BY_ID, apperror.ErrUserNotExists, apperror.ErrUserNotExists)
-	}
-
-	err := u.r.UpdateUserById(ctx, user)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (u UserServiceImpl) DeleteUserById(ctx context.Context, id int) error {
-	isUserExists := u.r.IsUserExists(ctx, id)
-	if !isUserExists {
-		return apperror.NewErrStatusBadRequest(constant.DELETE_USER_BY_ID, apperror.ErrUserNotExists, apperror.ErrUserNotExists)
-	}
-
-	err := u.r.DeleteUserById(ctx, id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (u UserServiceImpl) Login(ctx context.Context, userAuth entity.User) (string, error) {
-	isUserExists := u.r.IsEmailExists(ctx, userAuth.Email)
+func (u AdminServiceImpl) Login(ctx context.Context, userAuth entity.User) (string, error) {
+	isUserExists := u.ur.IsEmailExists(ctx, userAuth.Email)
 	if !isUserExists {
 		return "", apperror.NewErrStatusBadRequest(constant.LOGIN, apperror.ErrEmailOrPasswordInvalid, apperror.ErrEmailOrPasswordInvalid)
 	}
 
-	user, err := u.r.GetUserByEmail(ctx, userAuth.Email)
+	user, err := u.ur.GetUserByEmail(ctx, userAuth.Email)
 	if err != nil {
 		return "", err
 	}
 	userIdStr := strconv.Itoa(user.Id)
 
-	if user.Role != constant.USER {
+	if user.Role != constant.ADMIN {
 		return "", apperror.NewErrStatusBadRequest(constant.LOGIN, apperror.ErrWrongRole, apperror.ErrWrongRole)
 	}
 
@@ -134,7 +89,7 @@ func (u UserServiceImpl) Login(ctx context.Context, userAuth entity.User) (strin
 	return token, nil
 }
 
-func (s UserServiceImpl) Register(ctx context.Context, user entity.User) error {
+func (s AdminServiceImpl) Register(ctx context.Context, user entity.User) error {
 	isPasswordValid := apperror.IsPasswordValid(user.Password)
 	if !isPasswordValid {
 		return apperror.NewErrStatusBadRequest(constant.REGISTER, apperror.ErrPasswordInvalid, apperror.ErrPasswordInvalid)
@@ -144,7 +99,7 @@ func (s UserServiceImpl) Register(ctx context.Context, user entity.User) error {
 		return apperror.NewErrStatusBadRequest(constant.REGISTER, apperror.ErrUsernameInvalid, apperror.ErrUsernameInvalid)
 	}
 
-	isUserExists := s.r.IsUserExistsByEmail(ctx, user.Email)
+	isUserExists := s.ur.IsUserExistsByEmail(ctx, user.Email)
 	if isUserExists {
 		return apperror.NewErrStatusBadRequest(constant.REGISTER, apperror.ErrUserExists, apperror.ErrUserExists)
 	}
@@ -155,9 +110,9 @@ func (s UserServiceImpl) Register(ctx context.Context, user entity.User) error {
 	}
 
 	user.Password = string(hashedPassword)
-	user.Role = constant.USER
+	user.Role = constant.ADMIN
 
-	err = s.r.AddUser(ctx, user)
+	err = s.ur.AddUser(ctx, user)
 	if err != nil {
 		return err
 	}
@@ -165,8 +120,8 @@ func (s UserServiceImpl) Register(ctx context.Context, user entity.User) error {
 	return nil
 }
 
-func (u UserServiceImpl) UpdatePassword(ctx context.Context, user entity.User) error {
-	isUserExists := u.r.IsUserExists(ctx, user.Id)
+func (u AdminServiceImpl) UpdatePassword(ctx context.Context, user entity.User) error {
+	isUserExists := u.ur.IsUserExists(ctx, user.Id)
 	if !isUserExists {
 		return apperror.NewErrStatusBadRequest(constant.UPDATE_USER_BY_ID, apperror.ErrUserNotExists, apperror.ErrUserNotExists)
 	}
@@ -179,7 +134,7 @@ func (u UserServiceImpl) UpdatePassword(ctx context.Context, user entity.User) e
 	user.Password = string(hashedPassword)
 
 
-	err = u.r.UpdatePassword(ctx, user)
+	err = u.ur.UpdatePassword(ctx, user)
 	if err != nil {
 		return err
 	}

@@ -72,4 +72,5 @@ var (
 	ErrUsernameInvalid = errors.New("username invalid")
 	ErrUnauthorized = errors.New("unauthorized")
 	ErrUserExists = errors.New("user exists")
+	ErrWrongRole = errors.New("wrong role")
 )

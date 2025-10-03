@@ -177,7 +177,7 @@ func (r userRepoImpl) AddUser(ctx context.Context, user entity.User) error {
 	query := `INSERT INTO users (name, email, password, phone_number, role)
 				VALUES ($1, $2, $3, $4, $5)`
 	
-	_, err := r.db.Exec(ctx, query, user.Name, user.Email, user.Password, user.PhoneNumber, constant.USER)
+	_, err := r.db.Exec(ctx, query, user.Name, user.Email, user.Password, user.PhoneNumber, user.Role)
 	if err != nil {
 		return apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
 	}
