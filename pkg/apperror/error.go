@@ -69,5 +69,7 @@ var (
 	ErrTokenInvalid = errors.New("token invalid")
 	ErrEmailOrPasswordInvalid = errors.New("email or password invalid")
 	ErrPasswordInvalid = errors.New("password invalid")
+	ErrUsernameInvalid = errors.New("username invalid")
 	ErrUnauthorized = errors.New("unauthorized")
+	ErrUserExists = errors.New("user exists")
 )

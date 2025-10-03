@@ -46,19 +46,20 @@ func setupRouter(c Controller) *gin.Engine {
 
 	userAuth := baseEndpoint.Group("/user/auth")
 	userAuth.POST("login", c.userController.Login)
+	userAuth.POST("register", c.userController.Register)
 
 	protected := baseEndpoint.Group("/")
 	protected.Use(middleware.CheckAuth)
 
 	userProtected := protected.Use(middleware.CheckUserAuth)
-	userProtected.PATCH("/:id", c.userController.UpdateUserById)
+	userProtected.PATCH("", c.userController.UpdateUser)
+	userProtected.PATCH("user/update-password", c.userController.UpdatePassword)
 
 	adminProtected := protected.Use(middleware.CheckAdminAuth)
 	adminProtected.GET("users", c.userController.GetUsers)	
 
 	return router
 }
-// test
 
 func setupUserController(db *pgx.Conn) controller.UserController {
 	userRepo := repo.NewUserRepo(db)

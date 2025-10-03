@@ -21,6 +21,7 @@ type UserService interface {
 	DeleteUserById(ctx context.Context, id int) error
 	Login(ctx context.Context, userAuth entity.User) (string, error)
 	Register(ctx context.Context, user entity.User) error
+	UpdatePassword(ctx context.Context, user entity.User) error 
 }
 
 type UserServiceImpl struct {
@@ -132,8 +133,18 @@ func (u UserServiceImpl) Login(ctx context.Context, userAuth entity.User) (strin
 func (s UserServiceImpl) Register(ctx context.Context, user entity.User) error {
 	isPasswordValid := apperror.IsPasswordValid(user.Password)
 	if !isPasswordValid {
-		return apperror.NewErrStatusBadRequest(constant.ADD_USER, apperror.ErrPasswordInvalid, apperror.ErrPasswordInvalid)
+		return apperror.NewErrStatusBadRequest(constant.REGISTER, apperror.ErrPasswordInvalid, apperror.ErrPasswordInvalid)
 	}
+	isUsernameValid := apperror.IsAlphanumeric(user.Name)
+	if !isUsernameValid {
+		return apperror.NewErrStatusBadRequest(constant.REGISTER, apperror.ErrUsernameInvalid, apperror.ErrUsernameInvalid)
+	}
+
+	isUserExists := s.r.IsUserExistsByEmail(ctx, user.Email)
+	if isUserExists {
+		return apperror.NewErrStatusBadRequest(constant.REGISTER, apperror.ErrUserExists, apperror.ErrUserExists)
+	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, apperror.ErrInternalServerError)
@@ -142,6 +153,28 @@ func (s UserServiceImpl) Register(ctx context.Context, user entity.User) error {
 	user.Password = string(hashedPassword)
 
 	err = s.r.AddUser(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u UserServiceImpl) UpdatePassword(ctx context.Context, user entity.User) error {
+	isUserExists := u.r.IsUserExists(ctx, user.Id)
+	if !isUserExists {
+		return apperror.NewErrStatusBadRequest(constant.UPDATE_USER_BY_ID, apperror.ErrUserNotExists, apperror.ErrUserNotExists)
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, apperror.ErrInternalServerError)
+	}
+
+	user.Password = string(hashedPassword)
+
+
+	err = u.r.UpdatePassword(ctx, user)
 	if err != nil {
 		return err
 	}

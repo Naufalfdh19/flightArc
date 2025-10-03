@@ -25,7 +25,6 @@ func (c UpdateUserConverter) ToEntity(userDto dto.UpdateUserRequest) entity.User
 		Name: userDto.Name,
 		Email: userDto.Email,
 		PhoneNumber: userDto.PhoneNumber,
-		Role: userDto.Role,
 	}
 }
 
@@ -44,6 +43,14 @@ func (c RegisterRequestConverter) ToEntity(userDto dto.AddUserRequest) entity.Us
 	return entity.User{
 		Name: userDto.Name,
 		Email: userDto.Email,
+		Password: userDto.Password,
+	}
+}
+
+type UpdatePasswordConverter struct {}
+
+func (c UpdatePasswordConverter) ToEntity(userDto dto.UpdatePasswordRequest) entity.User {
+	return entity.User{
 		Password: userDto.Password,
 	}
 }

@@ -38,3 +38,9 @@ func IsPasswordValid(password string) bool {
 
     return hasLetter && hasDigit && hasSymbol
 }
+
+func IsAlphanumeric(input string) bool {
+    match, _ := regexp.MatchString(`^[a-zA-Z0-9]+$`, input)
+    return match
+}
+

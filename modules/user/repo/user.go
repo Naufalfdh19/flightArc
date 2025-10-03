@@ -21,6 +21,8 @@ type UserRepo interface {
 	IsEmailExists(ctx context.Context, email string) bool
 	GetUserByEmail(ctx context.Context, email string) (*entity.User, error)
 	AddUser(ctx context.Context, user entity.User) error 
+	IsUserExistsByEmail(ctx context.Context, email string) bool 
+	UpdatePassword(ctx context.Context, user entity.User) error 
 }
 
 type userRepoImpl struct {
@@ -109,7 +111,7 @@ func (r userRepoImpl) IsUserExists(ctx context.Context, id int) bool {
 
 func (r userRepoImpl) UpdateUserById(ctx context.Context, user entity.User) error {
 	query := `UPDATE users  
-				SET name = $2, email = $3, phone_number = $4, role = $5, 
+				SET name = $2, email = $3, phone_number = $4, 
 					updated_at = NOW()
 				WHERE id = $1 AND deleted_at IS NULL`
 
@@ -117,8 +119,7 @@ func (r userRepoImpl) UpdateUserById(ctx context.Context, user entity.User) erro
 		user.Id,
 		user.Name,
 		user.Email,
-		user.PhoneNumber,
-		user.Role)
+		user.PhoneNumber)
 	if err != nil {
 		return apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
 	}
@@ -181,5 +182,31 @@ func (r userRepoImpl) AddUser(ctx context.Context, user entity.User) error {
 		return apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
 	}
 	
+	return nil
+}
+
+func (r userRepoImpl) IsUserExistsByEmail(ctx context.Context, email string) bool {
+	var exists bool
+	query := `SELECT EXISTS(
+		SELECT 1 
+		FROM users 
+		WHERE email = $1 AND deleted_at IS NULL)`
+	_ = r.db.QueryRow(ctx, query, email).Scan(&exists)
+	return exists
+}
+
+func (r userRepoImpl) UpdatePassword(ctx context.Context, user entity.User) error {
+	query := `UPDATE users  
+				SET password = $2, 
+					updated_at = NOW()
+				WHERE id = $1 AND deleted_at IS NULL`
+
+	_, err := r.db.Exec(context.Background(), query,
+		user.Id,
+		user.Password)
+	if err != nil {
+		return apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
+	}
+
 	return nil
 }

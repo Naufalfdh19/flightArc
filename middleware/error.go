@@ -20,7 +20,7 @@ func ErrorMiddleware(ctx *gin.Context) {
 		if errors.As(ctx.Errors[0], &ve) {
 			for _, fe := range ve {
 				errorDetails = append(errorDetails, apperror.ErrorDetail{
-					Field: fe.Error(),
+					Field: fe.Field(),
 					Message: apperror.ExtractValidationError(fe),
 				})
 			}
