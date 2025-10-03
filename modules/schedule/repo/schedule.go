@@ -2,24 +2,23 @@ package repo
 
 import (
 	"context"
+	"database/sql"
 	"flight/modules/schedule/entity"
 	"flight/modules/schedule/queryparams"
 	"flight/pkg/apperror"
 	"flight/pkg/constant"
-
-	"github.com/jackc/pgx/v5"
 )
 
-type ScheduleRepo interface{
-	GetSchedules(ctx context.Context, queryParams queryparams.QueryParams) ([]entity.Schedule, error) 
-	GetTotalSchedule(ctx context.Context) (int, error) 
+type ScheduleRepo interface {
+	GetSchedules(ctx context.Context, queryParams queryparams.QueryParams) ([]entity.Schedule, error)
+	GetTotalSchedule(ctx context.Context) (int, error)
 }
 
 type ScheduleRepoImpl struct {
-	db *pgx.Conn
+	db *sql.DB
 }
 
-func NewScheduleRepo(db *pgx.Conn) ScheduleRepoImpl {
+func NewScheduleRepo(db *sql.DB) ScheduleRepoImpl {
 	return ScheduleRepoImpl{
 		db: db,
 	}
@@ -33,7 +32,7 @@ func (r ScheduleRepoImpl) GetSchedules(ctx context.Context, queryParams querypar
 				WHERE deleted_at IS NULL`
 	query += queryparams.AddPagination(queryParams)
 
-	rows, err := r.db.Query(ctx, query)
+	rows, err := r.db.Query(query)
 
 	if err != nil {
 		return nil, apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
@@ -64,7 +63,7 @@ func (r ScheduleRepoImpl) GetTotalSchedule(ctx context.Context) (int, error) {
 				FROM flight.flight_schedules
 				WHERE deleted_at IS NULL`
 
-	err := r.db.QueryRow(ctx, query).Scan(&totalSchedule)
+	err := r.db.QueryRow(query).Scan(&totalSchedule)
 	if err != nil {
 		return 0, apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
 	}

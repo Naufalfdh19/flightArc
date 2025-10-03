@@ -2,7 +2,6 @@ package queryparams
 
 import (
 	"fmt"
-	"log"
 )
 
 type QueryParams struct {
@@ -25,7 +24,6 @@ func (c QueryParamsConverter) ConvertDtoToEntity(queryparamsDto QueryParamsDto) 
 }
 
 func AddPagination(queryParams QueryParams) string {
-	log.Println("testboy: ", queryParams.Page, queryParams.Limit)
 	return fmt.Sprintf(` LIMIT %d OFFSET %d`, queryParams.Limit, (queryParams.Page-1)*queryParams.Limit)
 }
 
@@ -34,7 +32,7 @@ func CheckPage(queryParams *QueryParams, totalPage int) {
 		queryParams.Page = 1
 	} else if queryParams.Page > totalPage {
 		queryParams.Page = totalPage
-	} 
+	}
 }
 
 func CheckLimit(queryParams *QueryParams) {

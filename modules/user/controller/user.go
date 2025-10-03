@@ -76,14 +76,20 @@ func (c UserController) GetUsers(ctx *gin.Context) {
 func (c UserController) UpdateUser(ctx *gin.Context) {
 	idRaw, exists := ctx.Get("user_id")
 	if !exists {
-		err := apperror.NewErrInternalServerError(constant.GET_USERS, apperror.ErrRoleNotExists, apperror.ErrRoleNotExists)
+		err := apperror.NewErrStatusUnauthorized(constant.CHECK_AUTH, apperror.ErrTokenInvalid, apperror.ErrTokenInvalid)
 		ctx.Error(err)
 		return
 	}
-	id := idRaw.(int)
+
+	id, err := strconv.Atoi(idRaw.(string))
+	if err != nil {
+		err = apperror.NewErrStatusBadRequest(constant.DELETE_USER_BY_ID, apperror.ErrConvertingType, apperror.ErrConvertingType)
+		ctx.Error(err)
+		return
+	}
 
 	var userDto dto.UpdateUserRequest
-	err := ctx.ShouldBindJSON(&userDto)
+	err = ctx.ShouldBindJSON(&userDto)
 	if err != nil {
 		err = apperror.NewErrStatusBadRequest(constant.UPDATE_USER_BY_ID, apperror.ErrBindingRequest, apperror.ErrBindingRequest)
 		ctx.Error(err)
@@ -164,14 +170,14 @@ func (c UserController) Register(ctx *gin.Context) {
 func (c UserController) UpdatePassword(ctx *gin.Context) {
 	idRaw, exists := ctx.Get("user_id")
 	if !exists {
-		err := apperror.NewErrInternalServerError(constant.GET_USERS, apperror.ErrRoleNotExists, apperror.ErrRoleNotExists)
+		err := apperror.NewErrStatusUnauthorized(constant.CHECK_AUTH, apperror.ErrTokenInvalid, apperror.ErrTokenInvalid)
 		ctx.Error(err)
 		return
 	}
 
 	id, err := strconv.Atoi(idRaw.(string))
 	if err != nil {
-		err = apperror.NewErrStatusBadRequest(constant.DELETE_USER_BY_ID, apperror.ErrConvertingType, apperror.ErrConvertingType)
+		err = apperror.NewErrStatusBadRequest(constant.UPDATE_PASSWORD, apperror.ErrConvertingType, apperror.ErrConvertingType)
 		ctx.Error(err)
 		return
 	}

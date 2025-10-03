@@ -1,17 +1,17 @@
 package repo
 
 import (
-	"github.com/jackc/pgx/v5"
+	"database/sql"
 )
 
 type AdminRepo interface {
 }
 
 type AdminRepoImpl struct {
-	db *pgx.Conn
+	db *sql.DB
 }
 
-func NewAdminRepo(db *pgx.Conn) AdminRepoImpl {
+func NewAdminRepo(db *sql.DB) AdminRepoImpl {
 	return AdminRepoImpl{
 		db: db,
 	}

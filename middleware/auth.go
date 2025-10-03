@@ -10,6 +10,7 @@ import (
 )
 
 func CheckAuth(ctx *gin.Context) {
+
 	authHeader := strings.Split(ctx.GetHeader("Authorization"), " ")
 	if len(authHeader) < 1 {
 		err := apperror.NewErrStatusUnauthorized(constant.CHECK_AUTH, apperror.ErrTokenInvalid, apperror.ErrTokenInvalid)
@@ -38,6 +39,7 @@ func CheckAuth(ctx *gin.Context) {
 
 	ctx.Set("user_id", jwtTokenClaims.UserID)
 	ctx.Set("role", jwtTokenClaims.Role)
+
 	ctx.Next()
 }
 
@@ -56,6 +58,8 @@ func CheckUserAuth(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
+
+	ctx.Next()
 }
 
 func CheckAdminAuth(ctx *gin.Context) {
@@ -73,4 +77,6 @@ func CheckAdminAuth(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
+
+	ctx.Next()
 }

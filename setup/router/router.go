@@ -1,6 +1,7 @@
 package router
 
 import (
+	"database/sql"
 	"flight/middleware"
 	"flight/modules/user/controller"
 	"flight/modules/user/repo"
@@ -10,22 +11,28 @@ import (
 	scheduleRepo "flight/modules/schedule/repo"
 	scheduleService "flight/modules/schedule/service"
 
+	adminController "flight/modules/admin/controller"
+	adminRepo "flight/modules/admin/repo"
+	adminService "flight/modules/admin/service"
+
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5"
 )
 
 type Controller struct {
-	userController controller.UserController
+	userController     controller.UserController
 	scheduleController scheduleController.ScheduleController
+	adminController    adminController.AdminController
 }
 
-func NewRouter(db *pgx.Conn) *gin.Engine {
+func NewRouter(db *sql.DB) *gin.Engine {
 	userController := setupUserController(db)
 	scheduleController := setupScheduleController(db)
+	adminController := setupAdminController(db)
 
 	return setupRouter(Controller{
-		userController: userController,
+		userController:     userController,
 		scheduleController: scheduleController,
+		adminController:    adminController,
 	})
 }
 
@@ -40,7 +47,7 @@ func setupRouter(c Controller) *gin.Engine {
 	userGeneral := baseEndpoint.Group("users")
 	userGeneral.GET("/:id", c.userController.GetUserById)
 	userGeneral.DELETE("/:id", c.userController.DeleteUserById)
-	
+
 	scheduleGeneral := baseEndpoint.Group("schedules")
 	scheduleGeneral.GET("", c.scheduleController.GetSchedules)
 
@@ -51,24 +58,37 @@ func setupRouter(c Controller) *gin.Engine {
 	protected := baseEndpoint.Group("/")
 	protected.Use(middleware.CheckAuth)
 
-	userProtected := protected.Use(middleware.CheckUserAuth)
+	userProtected := protected.Group("/")
+	userProtected.Use(middleware.CheckUserAuth)
 	userProtected.PATCH("", c.userController.UpdateUser)
 	userProtected.PATCH("user/update-password", c.userController.UpdatePassword)
 
-	adminProtected := protected.Use(middleware.CheckAdminAuth)
-	adminProtected.GET("users", c.userController.GetUsers)	
+	adminAuth := baseEndpoint.Group("/admin/auth")
+	adminAuth.POST("login", c.adminController.Login)
+	adminAuth.POST("register", c.adminController.Register)
+
+	adminProtected := protected.Group("/")
+	adminProtected.Use(middleware.CheckAdminAuth)
+	adminProtected.GET("users", c.userController.GetUsers)
 
 	return router
 }
 
-func setupUserController(db *pgx.Conn) controller.UserController {
+func setupUserController(db *sql.DB) controller.UserController {
 	userRepo := repo.NewUserRepo(db)
 	userService := service.NewUserService(userRepo)
 	return controller.NewUserController(userService)
 }
 
-func setupScheduleController(db *pgx.Conn) scheduleController.ScheduleController {
+func setupScheduleController(db *sql.DB) scheduleController.ScheduleController {
 	scheduleRepo := scheduleRepo.NewScheduleRepo(db)
 	scheduleService := scheduleService.NewScheduleService(scheduleRepo)
 	return scheduleController.NewScheduleController(scheduleService)
+}
+
+func setupAdminController(db *sql.DB) adminController.AdminController {
+	userRepo := repo.NewUserRepo(db)
+	adminRepo := adminRepo.NewAdminRepo(db)
+	adminService := adminService.NewUserService(adminRepo, userRepo)
+	return adminController.NewAdminController(adminService)
 }

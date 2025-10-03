@@ -126,7 +126,7 @@ func (u UserServiceImpl) Login(ctx context.Context, userAuth entity.User) (strin
 	}
 
 	jwtToken := jwttoken.JwtTokenImpl{}
-	token, err := jwtToken.GenerateJwtTokenForAuth(userIdStr, constant.USER)
+	token, err := jwtToken.GenerateJwtTokenForAuth(userIdStr, user.Role)
 	if err != nil {
 		return "", err
 	}

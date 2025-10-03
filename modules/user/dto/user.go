@@ -1,12 +1,12 @@
 package dto
 
 type GetUserResponse struct {
-	Id          int    `json:"id"`
-	Name        string `json:"name"`
-	Email       string `json:"email"`
-	Password    string `json:"password"`
-	PhoneNumber string `json:"phone_number"`
-	Role        string `json:"role"`
+	Id          int    `json:"id,omitempty"`
+	Name        string `json:"name,omitempty"`
+	Email       string `json:"email,omitempty"`
+	Password    string `json:"password,omitempty"`
+	PhoneNumber string `json:"phone_number,omitempty"`
+	Role        string `json:"role,omitempty"`
 }
 
 type UpdateUserRequest struct {

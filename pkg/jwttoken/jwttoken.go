@@ -4,7 +4,6 @@ import (
 	"context"
 	"flight/pkg/apperror"
 	"flight/pkg/constant"
-	"log"
 	"os"
 	"time"
 
@@ -41,7 +40,7 @@ func (j JwtTokenImpl) GenerateJwtTokenForAuth(userID, role string) (string, erro
 	registeredClaims := customClaims{
 		Role: role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:   "flight",
+			Issuer:   "flightApp",
 			Subject:  userID,
 			IssuedAt: jwt.NewNumericDate(now),
 			ExpiresAt: &jwt.NumericDate{
@@ -68,7 +67,7 @@ func (j JwtTokenImpl) ParseJwtTokenForAuth(ctx context.Context, tokenString stri
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		},
 		jwt.WithIssuedAt(),
-		jwt.WithIssuer("flight"),
+		jwt.WithIssuer("flightApp"),
 		jwt.WithExpirationRequired(),
 	)
 	if err != nil {
@@ -85,8 +84,6 @@ func (j JwtTokenImpl) ParseJwtTokenForAuth(ctx context.Context, tokenString stri
 		return nil, err
 	}
 
-	log.Println(userID)
-	log.Println(claims["role"])
 	role := claims["role"].(string)
 
 	jwtTokenClaims := NewJWTTokenClaims(userID, role)
