@@ -70,3 +70,15 @@ func (r ScheduleRepoImpl) GetTotalSchedule(ctx context.Context) (int, error) {
 
 	return totalSchedule, nil
 }
+
+// {
+// 	{
+// 		seat_number: 1,
+// 		class: business,
+// 		price: 100000,
+// 		isEmergency:
+// 		isAvailable:
+// 	},
+// }
+
+
