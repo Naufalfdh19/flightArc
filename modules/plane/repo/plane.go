@@ -24,7 +24,7 @@ func NewPlaneRepo(db *sql.DB) PlaneRepoImpl {
 }
 
 func (r PlaneRepoImpl) AddPlane(ctx context.Context, plane entity.Plane) error {
-	query := `INSERT INTO users (name, seats, capacity, registration_code, status, airline_id)
+	query := `INSERT INTO planes (name, seats, capacity, registration_code, status, airline_id)
 				VALUES ($1, $2, $3, $4, $5, $6)`
 
 				
@@ -47,4 +47,5 @@ func (r PlaneRepoImpl) IsPlaneExistsByRegistrationCode(ctx context.Context, code
 	_ = r.db.QueryRow(query, code).Scan(&exists)
 	return exists
 }
+
 

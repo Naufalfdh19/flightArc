@@ -15,6 +15,12 @@ import (
 	adminRepo "flight/modules/admin/repo"
 	adminService "flight/modules/admin/service"
 
+	planeController "flight/modules/plane/controller"
+	planeRepo "flight/modules/plane/repo"
+	planeService "flight/modules/plane/service"
+
+	airlineRepo "flight/modules/airline/repo"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,17 +28,20 @@ type Controller struct {
 	userController     controller.UserController
 	scheduleController scheduleController.ScheduleController
 	adminController    adminController.AdminController
+	planeController    planeController.PlaneController
 }
 
 func NewRouter(db *sql.DB) *gin.Engine {
 	userController := setupUserController(db)
 	scheduleController := setupScheduleController(db)
 	adminController := setupAdminController(db)
+	planeController := setupPlaneController(db)
 
 	return setupRouter(Controller{
 		userController:     userController,
 		scheduleController: scheduleController,
 		adminController:    adminController,
+		planeController:    planeController,
 	})
 }
 
@@ -71,6 +80,10 @@ func setupRouter(c Controller) *gin.Engine {
 	adminProtected.Use(middleware.CheckAdminAuth)
 	adminProtected.GET("users", c.userController.GetUsers)
 
+	airlineAdminProtected := protected.Group("/")
+	airlineAdminProtected.Use(middleware.CheckAirlineAdminAuth)
+	airlineAdminProtected.POST("planes", c.planeController.AddPlane)
+
 	return router
 }
 
@@ -89,6 +102,13 @@ func setupScheduleController(db *sql.DB) scheduleController.ScheduleController {
 func setupAdminController(db *sql.DB) adminController.AdminController {
 	userRepo := repo.NewUserRepo(db)
 	adminRepo := adminRepo.NewAdminRepo(db)
-	adminService := adminService.NewUserService(adminRepo, userRepo)
+	adminService := adminService.NewAdminService(adminRepo, userRepo)
 	return adminController.NewAdminController(adminService)
+}
+
+func setupPlaneController(db *sql.DB) planeController.PlaneController {
+	planeRepo := planeRepo.NewPlaneRepo(db)
+	airlineRepo := airlineRepo.NewAirlineRepo(db)
+	planeService := planeService.NewPlaneService(planeRepo, airlineRepo)
+	return planeController.NewPlaneController(planeService)
 }

@@ -26,7 +26,7 @@ func (c PlaneController) AddPlane(ctx *gin.Context) {
 	var planeDto dto.AddPlaneRequest
 	err := ctx.ShouldBindJSON(&planeDto)
 	if err != nil {
-		err = apperror.NewErrStatusBadRequest(constant.ADD_PLANE, apperror.ErrBindingRequest, apperror.ErrBindingRequest)
+		err = apperror.NewErrStatusBadRequest(constant.ADD_PLANE, apperror.ErrBindingRequest, err)
 		ctx.Error(err)
 		return
 	}

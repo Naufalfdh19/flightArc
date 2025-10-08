@@ -23,7 +23,7 @@ type AdminServiceImpl struct {
 	ur userRepo.UserRepo
 }
 
-func NewUserService(adminRepo repo.AdminRepo, userRepo userRepo.UserRepo) AdminServiceImpl {
+func NewAdminService(adminRepo repo.AdminRepo, userRepo userRepo.UserRepo) AdminServiceImpl {
 	return AdminServiceImpl{
 		ar: adminRepo,
 		ur: userRepo,
@@ -42,7 +42,7 @@ func (s AdminServiceImpl) Login(ctx context.Context, userAuth entity.User) (stri
 	}
 	userIdStr := strconv.Itoa(user.Id)
 
-	if user.Role != constant.ADMIN {
+	if user.Role != constant.ADMIN && user.Role != constant.AIRLINE_ADMIN {
 		return "", apperror.NewErrStatusBadRequest(constant.LOGIN, apperror.ErrWrongRole, apperror.ErrWrongRole)
 	}
 

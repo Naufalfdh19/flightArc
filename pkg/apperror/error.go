@@ -62,6 +62,7 @@ var (
 	ErrInternalServerError = errors.New("internal server error")
 	ErrUserNotExists = errors.New("user not exists")
 	ErrRoleNotExists = errors.New("role not exists")
+	ErrAirlineNotExists = errors.New("airline not exists")
 	ErrTransactionFailed = errors.New("transaction failed")
 	ErrBindingRequest = errors.New("binding request failed")	
 	ErrConvertingType = errors.New("converting type error")

@@ -80,3 +80,22 @@ func CheckAdminAuth(ctx *gin.Context) {
 
 	ctx.Next()
 }
+
+func CheckAirlineAdminAuth(ctx *gin.Context) {
+	role, exists := ctx.Get("role")
+	if !exists {
+		err := apperror.NewErrStatusUnauthorized(constant.CHECK_AUTH, apperror.ErrTokenInvalid, apperror.ErrTokenInvalid)
+		ctx.Error(err)
+		ctx.Abort()
+		return
+	}
+
+	if role != constant.AIRLINE_ADMIN {
+		err := apperror.NewErrStatusUnauthorized(constant.CHECK_AUTH, apperror.ErrUnauthorized, apperror.ErrUnauthorized)
+		ctx.Error(err)
+		ctx.Abort()
+		return
+	}
+
+	ctx.Next()
+}

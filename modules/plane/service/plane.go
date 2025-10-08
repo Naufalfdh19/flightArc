@@ -4,6 +4,7 @@ import (
 	"context"
 	"flight/modules/plane/entity"
 	"flight/modules/plane/repo"
+	airlineRepo "flight/modules/airline/repo"
 	"flight/pkg/apperror"
 	"flight/pkg/constant"
 )
@@ -13,25 +14,33 @@ type PlaneService interface{
 }
 
 type PlaneServiceImpl struct {
-	r repo.PlaneRepo
+	pr repo.PlaneRepo
+	ar airlineRepo.AirlineRepo
 }
 
-func NewPlaneService(r repo.PlaneRepo) PlaneServiceImpl {
+func NewPlaneService(pr repo.PlaneRepo, ar airlineRepo.AirlineRepo) PlaneServiceImpl {
 	return PlaneServiceImpl{
-		r: r,
+		pr: pr,
+		ar: ar,
 	}
 }
 
 func (s PlaneServiceImpl) AddPlane(ctx context.Context, plane entity.Plane) error {
-	isPlaneExists := s.r.IsPlaneExistsByRegistrationCode(ctx, plane.RegistrationCode) 
+	isPlaneExists := s.pr.IsPlaneExistsByRegistrationCode(ctx, plane.RegistrationCode) 
 	if isPlaneExists {
 		return apperror.NewErrStatusBadRequest(constant.ADD_PLANE, apperror.ErrPlaneExists, apperror.ErrPlaneExists)
 	}
+	
+	isAirlineExists := s.ar.IsAirlineExistsById(ctx, plane.AirlineId)
+	if !isAirlineExists {
+		return apperror.NewErrStatusBadRequest(constant.ADD_PLANE, apperror.ErrAirlineNotExists, apperror.ErrAirlineNotExists)
+	}
 
-	err := s.r.AddPlane(ctx, plane) 
+	err := s.pr.AddPlane(ctx, plane) 
 	if err != nil {
 		return err
 	}
 
 	return nil
 }
+

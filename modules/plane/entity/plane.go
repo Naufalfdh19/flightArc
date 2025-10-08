@@ -3,7 +3,7 @@ package entity
 type Plane struct {
 	Id int
 	Name string
-	Seats interface{}
+	Seats []interface{}
 	Capacity int 
 	RegistrationCode string
 	Status string
