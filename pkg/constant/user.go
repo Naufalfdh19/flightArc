@@ -9,5 +9,6 @@ const (
 	GET_USERS = "get users"
 	UPDATE_USER_BY_ID = "update user by id"
 	DELETE_USER_BY_ID =	"delete user by id"
+	GENERATE_TOKEN = "generate token"
 )
 	

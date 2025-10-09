@@ -11,8 +11,8 @@ type ErrorDetail struct {
 }
 
 type ErrorStruct struct {
-	Field string
-	Message string
+	Field         string
+	Message       string
 	Status        int
 	SpecificError error
 }
@@ -57,22 +57,24 @@ func NewErrInternalServerError(field string, sentinel, err error) *ErrorStruct {
 	}
 }
 
-
 var (
-	ErrInternalServerError = errors.New("internal server error")
-	ErrUserNotExists = errors.New("user not exists")
-	ErrRoleNotExists = errors.New("role not exists")
-	ErrAirlineNotExists = errors.New("airline not exists")
-	ErrTransactionFailed = errors.New("transaction failed")
-	ErrBindingRequest = errors.New("binding request failed")	
-	ErrConvertingType = errors.New("converting type error")
+	ErrInternalServerError     = errors.New("internal server error")
+	ErrUserNotExists           = errors.New("user not exists")
+	ErrRoleNotExists           = errors.New("role not exists")
+	ErrAirlineNotExists        = errors.New("airline not exists")
+	ErrTransactionFailed       = errors.New("transaction failed")
+	ErrBindingRequest          = errors.New("binding request failed")
+	ErrConvertingType          = errors.New("converting type error")
 	ErrUnexpectedSigningMethod = errors.New("unexpected signing method")
-	ErrTokenInvalid = errors.New("token invalid")
-	ErrEmailOrPasswordInvalid = errors.New("email or password invalid")
-	ErrPasswordInvalid = errors.New("password invalid")
-	ErrUsernameInvalid = errors.New("username invalid")
-	ErrUnauthorized = errors.New("unauthorized")
-	ErrUserExists = errors.New("user exists")
-	ErrPlaneExists = errors.New("plane exists")
-	ErrWrongRole = errors.New("wrong role")
+	ErrTokenInvalid            = errors.New("token invalid")
+	ErrEmailOrPasswordInvalid  = errors.New("email or password invalid")
+	ErrPasswordInvalid         = errors.New("password invalid")
+	ErrUsernameInvalid         = errors.New("username invalid")
+	ErrUnauthorized            = errors.New("unauthorized")
+	ErrUserExists              = errors.New("user exists")
+	ErrPlaneExists             = errors.New("plane exists")
+	ErrPlaneNotExists          = errors.New("plane not exists")
+	ErrWrongRole               = errors.New("wrong role")
+	ErrRefreshTokenNotExists   = errors.New("refresh token not exists")
+	ErrAccessTokenNotExists    = errors.New("access token not exists")
 )

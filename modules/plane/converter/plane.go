@@ -18,4 +18,12 @@ func (c AddPlaneConverter) ToEntity(planeDto dto.AddPlaneRequest) entity.Plane {
 	}
 }
 
+type UpdateSeatsConverter struct{}
+
+func (c UpdateSeatsConverter) ToEntity(seatsDto dto.UpdateSeats) entity.Plane {
+	return entity.Plane{
+		Seats: seatsDto.Seats,
+	}
+}
+
 

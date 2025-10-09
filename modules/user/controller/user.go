@@ -28,13 +28,28 @@ func NewUserController(s service.UserService) UserController {
 
 func (c UserController) GetUserById(ctx *gin.Context) {
 	idStr := ctx.Param("id")
-	id, err := strconv.Atoi(idStr)
+	idParam, err := strconv.Atoi(idStr)
 	if err != nil {
 		err = apperror.NewErrInternalServerError(constant.GET_USER_BY_ID, apperror.ErrConvertingType, apperror.ErrConvertingType)
 		ctx.Error(err)
 		return
 	}
-	user, err := c.s.GetUserById(ctx, id)
+
+	idRaw, exists := ctx.Get("user_id")
+	if !exists {
+		err := apperror.NewErrStatusUnauthorized(constant.CHECK_AUTH, apperror.ErrTokenInvalid, apperror.ErrTokenInvalid)
+		ctx.Error(err)
+		return
+	}
+
+	idAuth, err := strconv.Atoi(idRaw.(string))
+	if err != nil {
+		err = apperror.NewErrStatusBadRequest(constant.UPDATE_PASSWORD, apperror.ErrConvertingType, apperror.ErrConvertingType)
+		ctx.Error(err)
+		return
+	}
+
+	user, err := c.s.GetUserById(ctx, idAuth, idParam)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -200,3 +215,37 @@ func (c UserController) UpdatePassword(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, wrapper.Response(nil, nil, "update password success"))
 }
+
+func (c UserController) GenerateNewAccessToken(ctx *gin.Context) {
+	idRaw, exists := ctx.Get("user_id")
+	if !exists {
+		err := apperror.NewErrStatusUnauthorized(constant.CHECK_AUTH, apperror.ErrTokenInvalid, apperror.ErrTokenInvalid)
+		ctx.Error(err)
+		return
+	}
+
+	id, err := strconv.Atoi(idRaw.(string))
+	if err != nil {
+		err = apperror.NewErrStatusBadRequest(constant.UPDATE_PASSWORD, apperror.ErrConvertingType, apperror.ErrConvertingType)
+		ctx.Error(err)
+		return
+	}
+
+	var userDto dto.UpdatePasswordRequest
+	err = ctx.ShouldBindJSON(&userDto)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	user := converter.UpdatePasswordConverter{}.ToEntity(userDto)
+	user.Id = id
+
+	err = c.s.UpdatePassword(ctx, user)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, wrapper.Response(nil, nil, "update password success"))
+} 

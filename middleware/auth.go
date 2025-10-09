@@ -19,10 +19,12 @@ func CheckAuth(ctx *gin.Context) {
 		return
 	}
 
-	token := authHeader[1]
+	accessToken := authHeader[1]
 
 	jwtToken := jwttoken.JwtTokenImpl{}
-	jwtTokenClaims, err := jwtToken.ParseJwtTokenForAuth(ctx, token)
+	jwtTokenClaims := jwtToken.GetJwtTokenClaims(ctx, accessToken)
+
+	err := jwtToken.CheckJwtTokenForAuth(ctx, accessToken)
 	if err != nil {
 		err := apperror.NewErrStatusUnauthorized(constant.CHECK_AUTH, apperror.ErrTokenInvalid, err)
 		ctx.Error(err)

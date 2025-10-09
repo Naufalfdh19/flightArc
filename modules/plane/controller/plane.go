@@ -8,6 +8,7 @@ import (
 	"flight/pkg/constant"
 	"flight/pkg/wrapper"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -40,4 +41,33 @@ func (c PlaneController) AddPlane(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, wrapper.Response(nil, nil, "add plane success"))
+}
+
+func (c PlaneController) UpdateSeats(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		err = apperror.NewErrStatusBadRequest(constant.UPDATE_SEATS, apperror.ErrConvertingType, err)
+		ctx.Error(err)
+		return
+	}
+
+	var seatsDto dto.UpdateSeats
+	err = ctx.ShouldBindJSON(&seatsDto)
+	if err != nil {
+		err = apperror.NewErrStatusBadRequest(constant.UPDATE_SEATS, apperror.ErrBindingRequest, err)
+		ctx.Error(err)
+		return
+	}
+
+	plane := converter.UpdateSeatsConverter{}.ToEntity(seatsDto)
+	plane.Id = id
+
+	err = c.s.UpdateSeats(ctx, plane)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, wrapper.Response(nil, nil, "update seats success"))
 }

@@ -11,6 +11,7 @@ import (
 
 type PlaneService interface{
 	AddPlane(ctx context.Context, plane entity.Plane) error 
+	UpdateSeats(ctx context.Context, plane entity.Plane) error 
 }
 
 type PlaneServiceImpl struct {
@@ -43,4 +44,20 @@ func (s PlaneServiceImpl) AddPlane(ctx context.Context, plane entity.Plane) erro
 
 	return nil
 }
+
+func (s PlaneServiceImpl) UpdateSeats(ctx context.Context, plane entity.Plane) error {
+	isPlaneExists := s.pr.IsPlaneExistsById(ctx, plane.Id) 
+	if !isPlaneExists {
+		return apperror.NewErrStatusBadRequest(constant.UPDATE_SEATS, apperror.ErrPlaneNotExists, apperror.ErrPlaneNotExists)
+	}
+
+	err := s.pr.UpdateSeats(ctx, plane) 
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+
 

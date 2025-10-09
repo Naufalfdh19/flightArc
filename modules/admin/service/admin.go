@@ -52,7 +52,7 @@ func (s AdminServiceImpl) Login(ctx context.Context, userAuth entity.User) (stri
 	}
 
 	jwtToken := jwttoken.JwtTokenImpl{}
-	token, err := jwtToken.GenerateJwtTokenForAuth(userIdStr, user.Role)
+	token, err := jwtToken.GenerateAccessTokenForAuth(userIdStr, user.Role)
 	if err != nil {
 		return "", err
 	}

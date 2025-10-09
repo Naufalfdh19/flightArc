@@ -211,3 +211,4 @@ func (r userRepoImpl) UpdatePassword(ctx context.Context, user entity.User) erro
 
 	return nil
 }
+
