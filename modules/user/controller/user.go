@@ -1,6 +1,7 @@
 package controller
 
 import (
+	tokenController "flight/modules/token/controller"
 	"flight/modules/user/converter"
 	"flight/modules/user/dto"
 	"flight/modules/user/entity"
@@ -148,16 +149,18 @@ func (c UserController) Login(ctx *gin.Context) {
 		err = apperror.NewErrStatusBadRequest(constant.LOGIN, apperror.ErrBindingRequest, apperror.ErrBindingRequest)
 		ctx.Error(err)
 		return
-	}
+	}	
 
 	user := converter.LoginRequestConverter{}.ToEntity(userDto)
-	token, err := c.s.Login(ctx, user)
+	tokens, err := c.s.Login(ctx, user)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
 
-	response := dto.LoginResponse{Token: token}
+	tokenController.SetRefreshTokenCookie(ctx, tokens.RefreshToken)
+
+	response := dto.LoginResponse{Token: tokens.AccessToken}
 
 	ctx.JSON(http.StatusOK, wrapper.Response(response, nil, "login success"))
 }

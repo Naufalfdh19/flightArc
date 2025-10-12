@@ -68,7 +68,7 @@ func (j JwtTokenImpl) GenerateRefreshToken(userID, role string) (string, error) 
 			Subject:  userID,
 			IssuedAt: jwt.NewNumericDate(now),
 			ExpiresAt: &jwt.NumericDate{
-				Time: now.Add(24 * 7 * time.Hour),
+				Time: now.Add(24 * 7 * time.Second),
 			},
 		},
 	}

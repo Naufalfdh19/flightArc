@@ -6,7 +6,6 @@ import (
 	"flight/pkg/constant"
 	"flight/pkg/wrapper"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,21 +21,34 @@ func NewTokenController(s service.TokenService) TokenController {
 }
 
 func (c TokenController) GenerateNewAccessToken(ctx *gin.Context) {
-	authHeader := strings.Split(ctx.GetHeader("Authorization"), " ")
-	if len(authHeader) < 1 {
-		err := apperror.NewErrStatusUnauthorized(constant.GENERATE_TOKEN, apperror.ErrAccessTokenNotExists, apperror.ErrAccessTokenNotExists)
+	refreshToken, err := getRefreshToken(ctx)
+	if err != nil {
+		err := apperror.NewErrStatusNotFound(constant.GENERATE_TOKEN, apperror.ErrRefreshTokenNotExists, apperror.ErrRefreshTokenNotExists)
 		ctx.Error(err)
-		ctx.Abort()
 		return
 	}
 
-	accessToken := authHeader[1]
-
-	newAccessToken, err := c.s.GenerateNewAccessToken(ctx, accessToken)
+	newAccessToken, err := c.s.GenerateNewAccessToken(ctx, refreshToken)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
 
 	ctx.JSON(http.StatusOK, wrapper.Response(newAccessToken, nil, "get new access token success"))
+}
+
+func SetRefreshTokenCookie(c *gin.Context, token string) {
+	c.SetCookie(
+		"refresh_token",      // name
+		token,               // value
+		7*24*60*60,          // maxAge in seconds (7 days)
+		"/api/v1/tokens", // path
+		"",                  // domain ("" for localhost)
+		true,                // secure (true = HTTPS only)
+		true,                // httpOnly
+	)
+}
+
+func getRefreshToken(c *gin.Context) (string, error) {
+	return c.Cookie("refresh_token")
 }

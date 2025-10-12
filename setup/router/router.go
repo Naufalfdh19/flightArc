@@ -20,7 +20,6 @@ import (
 	planeService "flight/modules/plane/service"
 
 	tokenController "flight/modules/token/controller"
-	tokenRepo "flight/modules/token/repo"
 	tokenService "flight/modules/token/service"
 
 	airlineRepo "flight/modules/airline/repo"
@@ -101,9 +100,8 @@ func setupRouter(c Controller) *gin.Engine {
 }
 
 func setupUserController(db *sql.DB) controller.UserController {
-	tokenRepo := tokenRepo.NewTokenRepo(db)
 	userRepo := repo.NewUserRepo(db)
-	userService := service.NewUserService(userRepo, tokenRepo)
+	userService := service.NewUserService(userRepo)
 	return controller.NewUserController(userService)
 }
 
@@ -128,7 +126,6 @@ func setupPlaneController(db *sql.DB) planeController.PlaneController {
 }
 
 func setupTokenController(db *sql.DB) tokenController.TokenController {
-	tokenRepo := tokenRepo.NewTokenRepo(db)
-	tokenService := tokenService.NewTokenService(tokenRepo)
+	tokenService := tokenService.NewTokenService()
 	return tokenController.NewTokenController(tokenService)
 }
