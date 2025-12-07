@@ -11,7 +11,7 @@ import (
 )
 
 func ConnectDB() (*sql.DB, error) {
-	conn, err := sql.Open("pgx", fmt.Sprintf("postgresql://%s:%s@%s/%s?search_path=flight",
+	conn, err := sql.Open("pgx", fmt.Sprintf("postgresql://%s:%s@%s/%s",
 		os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_NAME")))
 	if err != nil {
 		log.Fatalf("Unable to connect to database: %v\n", err)
