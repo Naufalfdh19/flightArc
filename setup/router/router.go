@@ -19,9 +19,6 @@ import (
 	planeRepo "flight/modules/plane/repo"
 	planeService "flight/modules/plane/service"
 
-	tokenController "flight/modules/token/controller"
-	tokenService "flight/modules/token/service"
-
 	airlineRepo "flight/modules/airline/repo"
 
 	"github.com/gin-gonic/gin"
@@ -32,7 +29,6 @@ type Controller struct {
 	scheduleController scheduleController.ScheduleController
 	adminController    adminController.AdminController
 	planeController    planeController.PlaneController
-	tokenControlelr    tokenController.TokenController
 }
 
 func NewRouter(db *sql.DB) *gin.Engine {
@@ -40,14 +36,12 @@ func NewRouter(db *sql.DB) *gin.Engine {
 	scheduleController := setupScheduleController(db)
 	adminController := setupAdminController(db)
 	planeController := setupPlaneController(db)
-	tokenController := setupTokenController(db)
 
 	return setupRouter(Controller{
 		userController:     userController,
 		scheduleController: scheduleController,
 		adminController:    adminController,
 		planeController:    planeController,
-		tokenControlelr:    tokenController,
 	})
 }
 
@@ -68,9 +62,6 @@ func setupRouter(c Controller) *gin.Engine {
 	userAuth := baseEndpoint.Group("/user/auth")
 	userAuth.POST("login", c.userController.Login)
 	userAuth.POST("register", c.userController.Register)
-
-	tokenGeneral := baseEndpoint.Group("/tokens")
-	tokenGeneral.GET("", c.tokenControlelr.GenerateNewAccessToken)
 
 	protected := baseEndpoint.Group("/")
 	protected.Use(middleware.CheckAuth)
@@ -123,9 +114,4 @@ func setupPlaneController(db *sql.DB) planeController.PlaneController {
 	airlineRepo := airlineRepo.NewAirlineRepo(db)
 	planeService := planeService.NewPlaneService(planeRepo, airlineRepo)
 	return planeController.NewPlaneController(planeService)
-}
-
-func setupTokenController(db *sql.DB) tokenController.TokenController {
-	tokenService := tokenService.NewTokenService()
-	return tokenController.NewTokenController(tokenService)
 }
