@@ -7,11 +7,8 @@ import (
 	"flight/modules/user/repo"
 	"flight/pkg/apperror"
 	"flight/pkg/constant"
-	"flight/pkg/jwttoken"
 	"flight/pkg/pagination"
-	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -20,9 +17,10 @@ type UserService interface {
 	GetUsers(ctx context.Context, queryParams queryparams.QueryParams) (*pagination.Pagination, error)
 	UpdateUserById(ctx context.Context, user entity.User) error
 	DeleteUserById(ctx context.Context, id int) error
-	Login(ctx *gin.Context, userAuth entity.User) (*entity.Token, error)
+	Login(ctx context.Context, userAuth entity.User) (string, error)
 	Register(ctx context.Context, user entity.User) error
 	UpdatePassword(ctx context.Context, user entity.User) error
+	GenerateNewAccessToken(ctx context.Context, userId int) (string, error) 
 }
 
 type UserServiceImpl struct {
@@ -109,77 +107,6 @@ func (s UserServiceImpl) DeleteUserById(ctx context.Context, id int) error {
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-func (s UserServiceImpl) Login(ctx *gin.Context, userAuth entity.User) (*entity.Token, error) {
-	isUserExists := s.ur.IsEmailExists(ctx, userAuth.Email)
-	if !isUserExists {
-		return nil, apperror.NewErrStatusBadRequest(constant.LOGIN, apperror.ErrEmailOrPasswordInvalid, apperror.ErrEmailOrPasswordInvalid)
-	}
-
-	user, err := s.ur.GetUserByEmail(ctx, userAuth.Email)
-	if err != nil {
-		return nil, err
-	}
-	userIdStr := strconv.Itoa(user.Id)
-
-	if user.Role != constant.USER {
-		return nil, apperror.NewErrStatusBadRequest(constant.LOGIN, apperror.ErrWrongRole, apperror.ErrWrongRole)
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userAuth.Password))
-	if err != nil {
-		return nil, apperror.NewErrStatusBadRequest(constant.LOGIN, apperror.ErrEmailOrPasswordInvalid, apperror.ErrEmailOrPasswordInvalid)
-	}
-
-	jwtToken := jwttoken.JwtTokenImpl{}
-	accessToken, err := jwtToken.GenerateAccessTokenForAuth(userIdStr, user.Role)
-	if err != nil {
-		return nil, err
-	}
-
-	refreshToken, err := jwtToken.GenerateRefreshToken(userIdStr, user.Role)
-	if err != nil {
-		return nil, err
-	}
-
-	tokens := entity.Token{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-	}
-
-	return &tokens, nil
-}
-
-func (s UserServiceImpl) Register(ctx context.Context, user entity.User) error {
-	isPasswordValid := apperror.IsPasswordValid(user.Password)
-	if !isPasswordValid {
-		return apperror.NewErrStatusBadRequest(constant.REGISTER, apperror.ErrPasswordInvalid, apperror.ErrPasswordInvalid)
-	}
-	isUsernameValid := apperror.IsAlphanumeric(user.Name)
-	if !isUsernameValid {
-		return apperror.NewErrStatusBadRequest(constant.REGISTER, apperror.ErrUsernameInvalid, apperror.ErrUsernameInvalid)
-	}
-
-	isUserExists := s.ur.IsUserExistsByEmail(ctx, user.Email)
-	if isUserExists {
-		return apperror.NewErrStatusBadRequest(constant.REGISTER, apperror.ErrUserExists, apperror.ErrUserExists)
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, apperror.ErrInternalServerError)
-	}
-
-	user.Password = string(hashedPassword)
-	user.Role = constant.USER
-
-	err = s.ur.AddUser(ctx, user)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 

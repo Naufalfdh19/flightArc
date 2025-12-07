@@ -28,7 +28,7 @@ type AddUserRequest struct {
 	Name     string `json:"name" binding:"required,min=7,max=15"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=8,max=20"`
-	Role     string `json:"role" binding:"required"`
+	Role     string `json:"role"`
 }
 
 type UpdatePasswordRequest struct {

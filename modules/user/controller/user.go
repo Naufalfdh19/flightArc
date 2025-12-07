@@ -1,13 +1,13 @@
 package controller
 
 import (
-	tokenController "flight/modules/token/controller"
 	"flight/modules/user/converter"
 	"flight/modules/user/dto"
 	"flight/modules/user/entity"
 	"flight/modules/user/queryparams"
 	"flight/modules/user/service"
 	"flight/pkg/apperror"
+	"flight/pkg/common"
 	"flight/pkg/constant"
 	"flight/pkg/pagination"
 	"flight/pkg/wrapper"
@@ -36,21 +36,13 @@ func (c UserController) GetUserById(ctx *gin.Context) {
 		return
 	}
 
-	idRaw, exists := ctx.Get("user_id")
-	if !exists {
-		err := apperror.NewErrStatusUnauthorized(constant.CHECK_AUTH, apperror.ErrTokenInvalid, apperror.ErrTokenInvalid)
-		ctx.Error(err)
-		return
-	}
-
-	idAuth, err := strconv.Atoi(idRaw.(string))
+	id, err := common.GetUserIdFromContext(ctx)
 	if err != nil {
-		err = apperror.NewErrStatusBadRequest(constant.UPDATE_PASSWORD, apperror.ErrConvertingType, apperror.ErrConvertingType)
 		ctx.Error(err)
 		return
 	}
 
-	user, err := c.s.GetUserById(ctx, idAuth, idParam)
+	user, err := c.s.GetUserById(ctx, id, idParam)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -90,16 +82,8 @@ func (c UserController) GetUsers(ctx *gin.Context) {
 }
 
 func (c UserController) UpdateUser(ctx *gin.Context) {
-	idRaw, exists := ctx.Get("user_id")
-	if !exists {
-		err := apperror.NewErrStatusUnauthorized(constant.CHECK_AUTH, apperror.ErrTokenInvalid, apperror.ErrTokenInvalid)
-		ctx.Error(err)
-		return
-	}
-
-	id, err := strconv.Atoi(idRaw.(string))
+	id, err := common.GetUserIdFromContext(ctx)
 	if err != nil {
-		err = apperror.NewErrStatusBadRequest(constant.DELETE_USER_BY_ID, apperror.ErrConvertingType, apperror.ErrConvertingType)
 		ctx.Error(err)
 		return
 	}
@@ -142,60 +126,10 @@ func (c UserController) DeleteUserById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, wrapper.Response(nil, nil, "delete success"))
 }
 
-func (c UserController) Login(ctx *gin.Context) {
-	var userDto dto.LoginRequest
-	err := ctx.ShouldBindJSON(&userDto)
-	if err != nil {
-		err = apperror.NewErrStatusBadRequest(constant.LOGIN, apperror.ErrBindingRequest, apperror.ErrBindingRequest)
-		ctx.Error(err)
-		return
-	}	
-
-	user := converter.LoginRequestConverter{}.ToEntity(userDto)
-	tokens, err := c.s.Login(ctx, user)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-
-	tokenController.SetRefreshTokenCookie(ctx, tokens.RefreshToken)
-
-	response := dto.LoginResponse{Token: tokens.AccessToken}
-
-	ctx.JSON(http.StatusOK, wrapper.Response(response, nil, "login success"))
-}
-
-func (c UserController) Register(ctx *gin.Context) {
-	var userDto dto.AddUserRequest
-	err := ctx.ShouldBindJSON(&userDto)
-	if err != nil {
-		err = apperror.NewErrStatusBadRequest(constant.REGISTER, apperror.ErrBindingRequest, apperror.ErrBindingRequest)
-		ctx.Error(err)
-		return
-	}
-
-	user := converter.RegisterRequestConverter{}.ToEntity(userDto)
-
-	err = c.s.Register(ctx, user)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-
-	ctx.JSON(http.StatusCreated, wrapper.Response(nil, nil, "register success"))
-}
 
 func (c UserController) UpdatePassword(ctx *gin.Context) {
-	idRaw, exists := ctx.Get("user_id")
-	if !exists {
-		err := apperror.NewErrStatusUnauthorized(constant.CHECK_AUTH, apperror.ErrTokenInvalid, apperror.ErrTokenInvalid)
-		ctx.Error(err)
-		return
-	}
-
-	id, err := strconv.Atoi(idRaw.(string))
+	id, err := common.GetUserIdFromContext(ctx)
 	if err != nil {
-		err = apperror.NewErrStatusBadRequest(constant.UPDATE_PASSWORD, apperror.ErrConvertingType, apperror.ErrConvertingType)
 		ctx.Error(err)
 		return
 	}
@@ -218,37 +152,3 @@ func (c UserController) UpdatePassword(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, wrapper.Response(nil, nil, "update password success"))
 }
-
-func (c UserController) GenerateNewAccessToken(ctx *gin.Context) {
-	idRaw, exists := ctx.Get("user_id")
-	if !exists {
-		err := apperror.NewErrStatusUnauthorized(constant.CHECK_AUTH, apperror.ErrTokenInvalid, apperror.ErrTokenInvalid)
-		ctx.Error(err)
-		return
-	}
-
-	id, err := strconv.Atoi(idRaw.(string))
-	if err != nil {
-		err = apperror.NewErrStatusBadRequest(constant.UPDATE_PASSWORD, apperror.ErrConvertingType, apperror.ErrConvertingType)
-		ctx.Error(err)
-		return
-	}
-
-	var userDto dto.UpdatePasswordRequest
-	err = ctx.ShouldBindJSON(&userDto)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-
-	user := converter.UpdatePasswordConverter{}.ToEntity(userDto)
-	user.Id = id
-
-	err = c.s.UpdatePassword(ctx, user)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-
-	ctx.JSON(http.StatusOK, wrapper.Response(nil, nil, "update password success"))
-} 
