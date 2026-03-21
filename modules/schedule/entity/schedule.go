@@ -7,10 +7,11 @@ import (
 )
 
 type Schedule struct {
-	Id            int
+	Id            string
 	Origin        string
 	Destination   string
 	Status        string
-	DepartureDate time.Time
+	DepartureTime time.Time
+	ArrivalTime   time.Time
 	Price         decimal.Decimal
 }
