@@ -10,8 +10,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-
-
 type JwtTokenImpl struct{}
 
 func NewJWT() *JwtTokenImpl {
@@ -45,7 +43,7 @@ func (j JwtTokenImpl) GenerateAccessTokenForAuth(userID, role string) (string, e
 			Subject:  userID,
 			IssuedAt: jwt.NewNumericDate(now),
 			ExpiresAt: &jwt.NumericDate{
-				Time: now.Add(24 * time.Second),
+				Time: now.Add(24 * time.Hour),
 			},
 		},
 	}
@@ -68,7 +66,7 @@ func (j JwtTokenImpl) GenerateRefreshToken(userID, role string) (string, error) 
 			Subject:  userID,
 			IssuedAt: jwt.NewNumericDate(now),
 			ExpiresAt: &jwt.NumericDate{
-				Time: now.Add(24 * 7 * time.Second),
+				Time: now.Add(24 * 7 * time.Hour),
 			},
 		},
 	}
@@ -101,7 +99,7 @@ func (j JwtTokenImpl) CheckJwtTokenForAuth(ctx context.Context, tokenString stri
 	return nil
 }
 
-func (j JwtTokenImpl) GetJwtTokenClaims(ctx context.Context, tokenString string) (*JwtTokenClaims) {
+func (j JwtTokenImpl) GetJwtTokenClaims(ctx context.Context, tokenString string) *JwtTokenClaims {
 	token, _ := jwt.Parse(
 		tokenString,
 		func(t *jwt.Token) (interface{}, error) {
