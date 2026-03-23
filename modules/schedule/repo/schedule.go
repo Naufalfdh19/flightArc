@@ -7,10 +7,11 @@ import (
 	"flight/modules/schedule/queryparams"
 	"flight/pkg/apperror"
 	"flight/pkg/constant"
+	"log"
 )
 
 type ScheduleRepo interface {
-	GetSchedules(ctx context.Context, queryParams queryparams.QueryParams) ([]entity.Schedule, error)
+	GetFlights(ctx context.Context, queryParams queryparams.QueryParams) ([]entity.Flight, error)
 	GetTotalSchedule(ctx context.Context) (int, error)
 }
 
@@ -24,12 +25,28 @@ func NewScheduleRepo(db *sql.DB) ScheduleRepoImpl {
 	}
 }
 
-func (r ScheduleRepoImpl) GetSchedules(ctx context.Context, queryParams queryparams.QueryParams) ([]entity.Schedule, error) {
-	var schedules []entity.Schedule
+func (r ScheduleRepoImpl) GetFlights(ctx context.Context, queryParams queryparams.QueryParams) ([]entity.Flight, error) {
+	var flights []entity.Flight
 
-	query := `SELECT id, origin, destination, status, departure_date
-				FROM flight.flight_schedules
-				WHERE deleted_at IS NULL`
+	query := `SELECT 
+					s.id,
+					s.origin_code, 
+					org.name AS origin_airport_name,
+					org.city AS origin_city,
+					org.country AS origin_country,
+					s.destination_code, 
+					dst.name AS destination_airport_name,
+					dst.city AS destination_city,
+					dst.country AS destination_country,
+					s.status, 
+					s.departure_time, 
+					s.arrival_time
+				FROM schedules s
+				LEFT JOIN airports org ON s.origin_code = org.code
+				LEFT JOIN airports dst ON s.destination_code = dst.code
+				WHERE s.deleted_at IS NULL`
+	
+	log.Print(queryParams.Page, queryParams.Limit)
 	query += queryparams.AddPagination(queryParams)
 
 	rows, err := r.db.Query(query)
@@ -40,27 +57,35 @@ func (r ScheduleRepoImpl) GetSchedules(ctx context.Context, queryParams querypar
 	defer rows.Close()
 
 	for rows.Next() {
-		var Schedule entity.Schedule
+		var flight entity.Flight
 
 		err := rows.Scan(
-			&Schedule.Id,
-			&Schedule.Origin,
-			&Schedule.Destination,
-			&Schedule.Status,
-			&Schedule.DepartureDate)
+			&flight.Id,
+			&flight.Origin.Code,
+			&flight.Origin.Name,
+			&flight.Origin.City,
+			&flight.Origin.Country,
+			&flight.Destination.Code,
+			&flight.Destination.Name,
+			&flight.Destination.City,
+			&flight.Destination.Country,
+			&flight.Status,
+			&flight.DepartureTime,
+			&flight.ArrivalTime,
+		)
 		if err != nil {
 			return nil, apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
 		}
-		schedules = append(schedules, Schedule)
+		flights = append(flights, flight)
 	}
 
-	return schedules, nil
+	return flights, nil
 }
 
 func (r ScheduleRepoImpl) GetTotalSchedule(ctx context.Context) (int, error) {
 	var totalSchedule int
 	query := `SELECT COUNT(*) 
-				FROM flight.flight_schedules
+				FROM schedules
 				WHERE deleted_at IS NULL`
 
 	err := r.db.QueryRow(query).Scan(&totalSchedule)
@@ -70,15 +95,3 @@ func (r ScheduleRepoImpl) GetTotalSchedule(ctx context.Context) (int, error) {
 
 	return totalSchedule, nil
 }
-
-// {
-// 	{
-// 		seat_number: 1,
-// 		class: business,
-// 		price: 100000,
-// 		isEmergency:
-// 		isAvailable:
-// 	},
-// }
-
-

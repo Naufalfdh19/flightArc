@@ -8,7 +8,7 @@ import (
 )
 
 type ScheduleService interface {
-	GetSchedules(ctx context.Context, queryParams queryparams.QueryParams) (*pagination.Pagination, error) 
+	GetFlights(ctx context.Context, queryParams queryparams.QueryParams) (*pagination.Pagination, error) 
 }
 
 type ScheduleServiceImpl struct {
@@ -21,7 +21,7 @@ func NewScheduleService(r repo.ScheduleRepo) ScheduleServiceImpl {
 	}
 }
 
-func (u ScheduleServiceImpl) GetSchedules(ctx context.Context, queryParams queryparams.QueryParams) (*pagination.Pagination, error) {
+func (u ScheduleServiceImpl) GetFlights(ctx context.Context, queryParams queryparams.QueryParams) (*pagination.Pagination, error) {
 	totalSchedule, err := u.r.GetTotalSchedule(ctx)
 	if err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func (u ScheduleServiceImpl) GetSchedules(ctx context.Context, queryParams query
 	}
 	queryparams.CheckPage(&queryParams, totalPage)
 
-	schedules, err := u.r.GetSchedules(ctx, queryParams)
+	flights, err := u.r.GetFlights(ctx, queryParams)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (u ScheduleServiceImpl) GetSchedules(ctx context.Context, queryParams query
 		Page:         queryParams.Page,
 		TotalElement: totalSchedule,
 		TotalPage:    totalPage,
-		Data:         schedules,
+		Data:         flights,
 	}
 
 	return &pagination, nil
