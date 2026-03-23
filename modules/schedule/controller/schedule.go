@@ -25,7 +25,7 @@ func NewScheduleController(s service.ScheduleService) ScheduleController {
 	}
 }
 
-func (c ScheduleController) GetSchedules(ctx *gin.Context) {
+func (c ScheduleController) GetFlights(ctx *gin.Context) {
 	var queryParamsDto queryparams.QueryParamsDto
 
 	if err := ctx.ShouldBindQuery(&queryParamsDto); err != nil {
@@ -35,20 +35,20 @@ func (c ScheduleController) GetSchedules(ctx *gin.Context) {
 	}
 	queryParams := queryparams.QueryParamsConverter{}.ConvertDtoToEntity(queryParamsDto)
 
-	schedulesPagination, err := c.s.GetSchedules(ctx, queryParams)
+	flightsPagination, err := c.s.GetFlights(ctx, queryParams)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
 
-	schedulesPaginationDto := pagination.Converter{}.ToDto(*schedulesPagination)
-	users := schedulesPagination.Data.([]entity.Schedule)
-	var usersDto []dto.GetScheduleDto
-	for _, user := range users {
-		userDto := converter.GetScheduleConverter{}.ToDto(user)
-		usersDto = append(usersDto, userDto)
+	flightsPaginationDto := pagination.Converter{}.ToDto(*flightsPagination)
+	flights := flightsPagination.Data.([]entity.Flight)
+	var flightsDto []dto.GetFlightDto
+	for _, flight := range flights {
+		flightDto := converter.GetFlightConverter{}.ToDto(flight)
+		flightsDto = append(flightsDto, flightDto)
 	}
-	schedulesPaginationDto.Data = usersDto
+	flightsPaginationDto.Data = flightsDto
 
-	ctx.JSON(http.StatusOK, wrapper.Response(schedulesPaginationDto, nil, ""))
+	ctx.JSON(http.StatusOK, wrapper.Response(flightsPaginationDto, nil, ""))
 }
