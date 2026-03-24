@@ -2,11 +2,11 @@ package repo
 
 import (
 	"context"
-	"database/sql"
 	"flight/modules/user/entity"
 	"flight/modules/user/queryparams"
 	"flight/pkg/apperror"
 	"flight/pkg/constant"
+	"gorm.io/gorm"
 )
 
 type UserRepo interface {
@@ -24,10 +24,10 @@ type UserRepo interface {
 }
 
 type userRepoImpl struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
-func NewUserRepo(db *sql.DB) userRepoImpl {
+func NewUserRepo(db *gorm.DB) userRepoImpl {
 	return userRepoImpl{
 		db: db,
 	}
@@ -41,7 +41,7 @@ func (r userRepoImpl) GetUsers(ctx context.Context, queryParams queryparams.Quer
 				WHERE deleted_at IS NULL`
 	query += queryparams.AddPagination(queryParams)
 
-	rows, err := r.db.Query(query)
+	rows, err := r.db.Raw(query).Rows()
 
 	if err != nil {
 		return nil, apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
@@ -72,9 +72,9 @@ func (r userRepoImpl) GetTotalUser(ctx context.Context) (int, error) {
 				FROM users
 				WHERE deleted_at IS NULL`
 
-	err := r.db.QueryRow(query).Scan(&totalUser)
+	err := r.db.Raw(query).Scan(&totalUser)
 	if err != nil {
-		return 0, apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
+		return 0, apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err.Error)
 	}
 
 	return totalUser, nil
@@ -83,17 +83,11 @@ func (r userRepoImpl) GetTotalUser(ctx context.Context) (int, error) {
 func (r userRepoImpl) GetUserById(ctx context.Context, id int) (*entity.User, error) {
 	var user entity.User
 
-	query := `SELECT id, name, email, phone_number, role
-			FROM users 
-			WHERE id = $1`
-
-	err := r.db.QueryRow(query, id).Scan(
-		&user.Id,
-		&user.Name,
-		&user.Email,
-		&user.PhoneNumber,
-		&user.Role,
-	)
+	err := r.db.
+		Select("id", "name", "email", "phone_number", "role").
+		Where(&entity.User{Id: id}).
+		First(&user).
+		Scan(&user).Error
 	if err != nil {
 		return nil, apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
 	}
@@ -106,35 +100,29 @@ func (r userRepoImpl) IsUserExists(ctx context.Context, id int) bool {
 	query := `SELECT EXISTS(
 		SELECT 1 
 		FROM users 
-		WHERE id = $1 AND deleted_at IS NULL)`
-	_ = r.db.QueryRow(query, id).Scan(&exists)
+		WHERE id = ? AND deleted_at IS NULL)`
+	_ = r.db.Raw(query, id).Scan(&exists)
 	return exists
 }
 
 func (r userRepoImpl) UpdateUserById(ctx context.Context, user entity.User) error {
-	query := `UPDATE users  
-				SET name = $2, email = $3, phone_number = $4, 
-					updated_at = NOW()
-				WHERE id = $1 AND deleted_at IS NULL`
+	err := r.db.WithContext(ctx).Model(&entity.User{}).
+        Where("id = ? AND deleted_at IS NULL", user.Id).
+        Updates(entity.User{
+            Name:        user.Name,
+            Email:       user.Email,
+            PhoneNumber: user.PhoneNumber,
+        }).Error
 
-	_, err := r.db.Exec(query,
-		user.Id,
-		user.Name,
-		user.Email,
-		user.PhoneNumber)
-	if err != nil {
-		return apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
-	}
+    if err != nil {
+        return apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
+    }
 
 	return nil
 }
 
 func (r userRepoImpl) DeleteUserById(ctx context.Context, id int) error {
-	query := `UPDATE flight.users 
-				SET deleted_at = NOW(), updated_at = NOW()
-				WHERE id = $1 AND deleted_at IS NULL`
-
-	_, err := r.db.Exec(query, id)
+	err := r.db.Delete(&entity.User{}, "id = ?", id).Error
 	if err != nil {
 		return err
 	}
@@ -147,26 +135,19 @@ func (r userRepoImpl) IsEmailExists(ctx context.Context, email string) bool {
 	query := `SELECT EXISTS(
 				SELECT 1 
 				FROM users 
-				WHERE email = $1 AND deleted_at IS NULL)`
-	_ = r.db.QueryRow(query, email).Scan(&exists)
+				WHERE email = ? AND deleted_at IS NULL)`
+	_ = r.db.Raw(query, email).Scan(&exists)
 	return exists
 }
 
 func (r userRepoImpl) GetUserByEmail(ctx context.Context, email string) (*entity.User, error) {
 	var user entity.User
 
-	query := `SELECT id, name, email, password, phone_number, role
-			FROM users 
-			WHERE email = $1`
-
-	err := r.db.QueryRow(query, email).Scan(
-		&user.Id,
-		&user.Name,
-		&user.Email,
-		&user.Password,
-		&user.PhoneNumber,
-		&user.Role,
-	)
+	err := r.db.
+		Select("id", "name", "email", "phone_number", "role").
+		Where(&entity.User{Email: email}).
+		First(&user).
+		Scan(&user).Error
 	if err != nil {
 		return nil, apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
 	}
@@ -176,11 +157,11 @@ func (r userRepoImpl) GetUserByEmail(ctx context.Context, email string) (*entity
 
 func (r userRepoImpl) AddUser(ctx context.Context, user entity.User) error {
 	query := `INSERT INTO users (name, email, password, phone_number, role)
-				VALUES ($1, $2, $3, $4, $5)`
+				VALUES (?, ?, ?, ?, ?)`
 
-	_, err := r.db.Exec(query, user.Name, user.Email, user.Password, user.PhoneNumber, user.Role)
+	err := r.db.Exec(query, user.Name, user.Email, user.Password, user.PhoneNumber, user.Role)
 	if err != nil {
-		return apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
+		return apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err.Error)
 	}
 
 	return nil
@@ -191,24 +172,23 @@ func (r userRepoImpl) IsUserExistsByEmail(ctx context.Context, email string) boo
 	query := `SELECT EXISTS(
 		SELECT 1 
 		FROM users 
-		WHERE email = $1 AND deleted_at IS NULL)`
-	_ = r.db.QueryRow(query, email).Scan(&exists)
+		WHERE email = ? AND deleted_at IS NULL)`
+	_ = r.db.Raw(query, email).Scan(&exists)
 	return exists
 }
 
 func (r userRepoImpl) UpdatePassword(ctx context.Context, user entity.User) error {
 	query := `UPDATE users  
-				SET password = $2, 
+				SET password = ?, 
 					updated_at = NOW()
-				WHERE id = $1 AND deleted_at IS NULL`
+				WHERE id = ? AND deleted_at IS NULL`
 
-	_, err := r.db.Exec(query,
-		user.Id,
-		user.Password)
+	err := r.db.Exec(query,
+		user.Password,
+		user.Id)
 	if err != nil {
-		return apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
+		return apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err.Error)
 	}
 
 	return nil
 }
-

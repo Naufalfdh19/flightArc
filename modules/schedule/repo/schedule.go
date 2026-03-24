@@ -2,12 +2,13 @@ package repo
 
 import (
 	"context"
-	"database/sql"
 	"flight/modules/schedule/entity"
 	"flight/modules/schedule/queryparams"
 	"flight/pkg/apperror"
 	"flight/pkg/constant"
 	"log"
+
+	"gorm.io/gorm"
 )
 
 type ScheduleRepo interface {
@@ -16,10 +17,10 @@ type ScheduleRepo interface {
 }
 
 type ScheduleRepoImpl struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
-func NewScheduleRepo(db *sql.DB) ScheduleRepoImpl {
+func NewScheduleRepo(db *gorm.DB) ScheduleRepoImpl {
 	return ScheduleRepoImpl{
 		db: db,
 	}
@@ -45,12 +46,11 @@ func (r ScheduleRepoImpl) GetFlights(ctx context.Context, queryParams queryparam
 				LEFT JOIN airports org ON s.origin_code = org.code
 				LEFT JOIN airports dst ON s.destination_code = dst.code
 				WHERE s.deleted_at IS NULL`
-	
+
 	log.Print(queryParams.Page, queryParams.Limit)
 	query += queryparams.AddPagination(queryParams)
 
-	rows, err := r.db.Query(query)
-
+	rows, err := r.db.Raw(query).Rows()
 	if err != nil {
 		return nil, apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
 	}
@@ -88,9 +88,9 @@ func (r ScheduleRepoImpl) GetTotalSchedule(ctx context.Context) (int, error) {
 				FROM schedules
 				WHERE deleted_at IS NULL`
 
-	err := r.db.QueryRow(query).Scan(&totalSchedule)
+	err := r.db.Raw(query).Scan(&totalSchedule)
 	if err != nil {
-		return 0, apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
+		return 0, apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err.Error)
 	}
 
 	return totalSchedule, nil
