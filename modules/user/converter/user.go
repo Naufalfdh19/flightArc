@@ -14,6 +14,7 @@ func (c GetUserConverter) ToDto(userEnt entity.User) dto.GetUserResponse {
 		Email: userEnt.Email,
 		Password: userEnt.Password,
 		PhoneNumber: userEnt.PhoneNumber,
+		Role: userEnt.Role,
 	}
 }
 
