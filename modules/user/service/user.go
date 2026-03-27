@@ -56,26 +56,22 @@ func (s UserServiceImpl) GetUserById(ctx context.Context, idAuth, idParam int) (
 }
 
 func (s UserServiceImpl) GetUsers(ctx context.Context, queryParams queryparams.QueryParams) (*pagination.Pagination, error) {
-	totalUser, err := s.ur.GetTotalUser(ctx)
+	queryparams.CheckLimit(&queryParams)
+
+	users, totalUsers, err := s.ur.GetUsers(ctx, queryParams)
 	if err != nil {
 		return nil, err
 	}
 
-	queryparams.CheckLimit(&queryParams)
-	totalPage := totalUser / queryParams.Limit
-	if totalUser%queryParams.Limit != 0 {
+	totalPage := totalUsers / queryParams.Limit
+	if totalUsers % queryParams.Limit != 0 {
 		totalPage += 1
 	}
 	queryparams.CheckPage(&queryParams, totalPage)
 
-	users, err := s.ur.GetUsers(ctx, queryParams)
-	if err != nil {
-		return nil, err
-	}
-
 	pagination := pagination.Pagination{
 		Page:         queryParams.Page,
-		TotalElement: totalUser,
+		TotalElement: totalUsers,
 		TotalPage:    totalPage,
 		Data:         users,
 	}
