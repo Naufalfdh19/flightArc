@@ -1,9 +1,11 @@
 package entity
 
+import "github.com/google/uuid"
+
 type Airport struct {
-	Id int
-    Code    string
-    Name    string
-    City    string
-    Country string
+	Id      uuid.UUID
+	Code    string
+	Name    string
+	City    string
+	Country string
 }
