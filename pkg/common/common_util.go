@@ -16,7 +16,7 @@ func GetUserIdFromContext(ctx *gin.Context) (int, error) {
 
 	id, err := strconv.Atoi(idRaw.(string))
 	if err != nil {
-		return 0, apperror.NewErrStatusBadRequest(constant.UPDATE_PASSWORD, apperror.ErrConvertingType, apperror.ErrConvertingType)
+		return 0, apperror.NewErrStatusBadRequest(constant.CHECK_AUTH, apperror.ErrConvertingType, apperror.ErrConvertingType)
 	}
 
 	return id, nil
