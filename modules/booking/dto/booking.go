@@ -6,11 +6,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 )
 
 type GetBooking struct {
-	Id          uuid.UUID                      `json:"id"`
+	Id          uuid.UUID                `json:"id"`
 	User        userDto.GetUserResponse  `json:"user"`
 	Flight      scheduleDto.GetFlightDto `json:"flight"`
 	Status      string                   `json:"status"`
