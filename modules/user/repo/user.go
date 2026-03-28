@@ -41,16 +41,15 @@ func (r userRepoImpl) GetUsers(ctx context.Context, queryParams queryparams.Quer
     query := r.db.WithContext(ctx).Model(&entity.User{}).Where("deleted_at IS NULL")
 
     if err := query.Count(&total).Error; err != nil {
-        return nil, 0, err
+        return nil, 0, apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
     }
 
     err := query.
         Select("id", "name", "email", "phone_number", "role").
         Scopes(common.Paginate(queryParams.Page, queryParams.Limit, int(total))).
         Find(&users).Error
-
     if err != nil {
-        return nil, 0, err
+        return nil, 0, apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
     }
 
     return users, int(total), nil
