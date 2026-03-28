@@ -1,7 +1,9 @@
 package dto
 
+import "github.com/google/uuid"
+
 type Airport struct {
-	Id      int    `json:"id,omitempty"`
+	Id      uuid.UUID    `json:"id,omitempty"`
 	Code    string `json:"code"`
 	Name    string `json:"name"`
 	City    string `json:"city"`
