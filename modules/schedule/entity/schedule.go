@@ -3,8 +3,6 @@ package entity
 import (
 	"flight/modules/airport/entity"
 	"time"
-
-	"github.com/shopspring/decimal"
 )
 
 type Schedule struct {
@@ -14,15 +12,19 @@ type Schedule struct {
 	Status        string
 	DepartureTime time.Time
 	ArrivalTime   time.Time
-	Price         decimal.Decimal
 }
 
 type Flight struct {
-	Id            string
-	Origin        entity.Airport
-	Destination   entity.Airport
-	Status        string
-	DepartureTime time.Time
-	ArrivalTime   time.Time
-	Price         decimal.Decimal
+	Id              string
+	OriginCode      string         `gorm:"column:origin_code"`
+	DestinationCode string         `gorm:"column:destination_code"`
+	Origin          entity.Airport `gorm:"foreignKey:OriginCode;references:Code"`
+	Destination     entity.Airport `gorm:"foreignKey:DestinationCode;references:Code"`
+	Status          string
+	DepartureTime   time.Time
+	ArrivalTime     time.Time
+}
+
+func (Flight) TableName() string {
+	return "schedules"
 }
