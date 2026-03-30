@@ -2,26 +2,22 @@ package database
 
 import (
 	"fmt"
-	"log"
 	"os"
 
-	"database/sql"
-
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-func ConnectDB() (*sql.DB, error) {
-	conn, err := sql.Open("pgx", fmt.Sprintf("postgresql://%s:%s@%s/%s",
-		os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_NAME")))
+func ConnectDB() (*gorm.DB, error) {
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=5432", os.Getenv("DB_HOST"), os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
+
+	conn, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("Unable to connect to database: %v\n", err)
-		return nil, err
+		panic("failed to connect database")
 	}
 
-	err = conn.Ping()
-	if err != nil {
-		return nil, err
-	}
+	fmt.Println("Database connected successfully!")
 
 	return conn, err
 }
