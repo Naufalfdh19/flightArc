@@ -34,3 +34,8 @@ type AddUserRequest struct {
 type UpdatePasswordRequest struct {
 	Password string `json:"password" binding:"required,min=8,max=20"`
 }
+
+type ContactDetail struct {
+	Email string `json:"email" binding:"required,email"`
+	PhoneNumber string `json:"phone_number,omitempty"`
+}
