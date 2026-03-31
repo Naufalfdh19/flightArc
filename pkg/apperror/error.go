@@ -77,4 +77,6 @@ var (
 	ErrWrongRole               = errors.New("wrong role")
 	ErrRefreshTokenNotExists   = errors.New("refresh token not exists")
 	ErrAccessTokenNotExists    = errors.New("access token not exists")
+	ErrGetBookings             = errors.New("get bookings failed")
+	ErrAddBookings             = errors.New("add bookings failed")
 )
