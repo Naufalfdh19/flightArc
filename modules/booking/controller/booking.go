@@ -1,11 +1,11 @@
 package controller
 
 import (
+	"flight/modules/booking/converter"
 	"flight/modules/booking/dto"
 	"flight/modules/booking/entity"
 	"flight/modules/booking/queryparams"
 	"flight/modules/booking/service"
-	"flight/modules/booking/converter"
 	"flight/pkg/apperror"
 	"flight/pkg/common"
 	"flight/pkg/constant"
@@ -14,6 +14,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type BookingController struct {
@@ -50,7 +51,7 @@ func (c BookingController) GetBookings(ctx *gin.Context) {
 
 	bookingsPaginationDto := pagination.Converter{}.ToDto(*bookingsPagination)
 	bookings := bookingsPagination.Data.([]entity.Booking)
-	var bookingsDto []dto.GetBooking
+	var bookingsDto []dto.GetBookingReq
 	for _, booking := range bookings {
 		bookingDto := converter.GetBookingsConverter{}.ToDto(booking)
 		bookingsDto = append(bookingsDto, bookingDto)
@@ -58,4 +59,43 @@ func (c BookingController) GetBookings(ctx *gin.Context) {
 	bookingsPaginationDto.Data = bookingsDto
 
 	ctx.JSON(http.StatusOK, wrapper.Response(bookingsPaginationDto, nil, ""))
+}
+
+func (c BookingController) AddBookings(ctx *gin.Context) {
+	id, err := common.GetUserIdFromContext(ctx)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	var bookingReq dto.AddBookingReq
+	err = ctx.ShouldBindJSON(&bookingReq)
+	if err != nil {
+		err = apperror.NewErrStatusBadRequest(constant.ADD_BOOKINGS, apperror.ErrBindingRequest, apperror.ErrBindingRequest)
+		ctx.Error(err)
+		return
+	}
+
+	bookingReq.UserId = id
+	err = c.s.AddBookings(ctx, bookingReq)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, wrapper.Response(nil, nil, "add bookings success"))
+}
+
+func (c BookingController) GetBookingsById(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	idParam, err := uuid.Parse(idStr)
+	if err != nil {
+		err = apperror.NewErrInternalServerError(constant.GET_BOOKING_BY_ID, apperror.ErrConvertingType, apperror.ErrConvertingType)
+		ctx.Error(err)
+		return
+	}
+
+	bookingDto, err := c.s.GetBookingsById(ctx, idParam)
+
+	ctx.JSON(http.StatusOK, wrapper.Response(bookingDto, nil, ""))
 }
