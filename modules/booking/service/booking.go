@@ -2,35 +2,64 @@ package service
 
 import (
 	"context"
+	"flight/modules/booking/converter"
+	"flight/modules/booking/dto"
+	"flight/modules/booking/entity"
 	"flight/modules/booking/queryparams"
-	"flight/modules/booking/repo"
+	bookingRepo "flight/modules/booking/repo"
+	scheduleRepo "flight/modules/schedule/repo"
+	"flight/pkg/apperror"
+	"flight/pkg/constant"
 	"flight/pkg/pagination"
+	"flight/pkg/transaction"
+	"log"
+	"time"
+
+	"github.com/google/uuid"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-type BookingService interface{
-	GetBookings(ctx context.Context, userId int, queryParams queryparams.QueryParams) (*pagination.Pagination, error) 
+type BookingService interface {
+	GetBookings(ctx context.Context, userId int, queryParams queryparams.QueryParams) (*pagination.Pagination, error)
+	AddBookings(ctx context.Context, bookingReq dto.AddBookingReq) error
+	GetBookingsById(ctx context.Context, bookingId uuid.UUID) (*dto.GetBookingReq, error)
+	CheckExpiredBooking() error
 }
 
 type BookingServiceImpl struct {
-	r repo.BookingRepo
+	bookingRepo bookingRepo.BookingRepo
+	ticketRepo  bookingRepo.TicketRepo
+	seatRepo    scheduleRepo.SeatRepo
+	tx          transaction.TransactorRepo
+	ch          *amqp.Channel
 }
 
-func NewBookingService(r repo.BookingRepo) *BookingServiceImpl {
+func NewBookingService(
+	bookingRepo bookingRepo.BookingRepo,
+	seatRepo scheduleRepo.SeatRepo,
+	ticketRepo bookingRepo.TicketRepo,
+	tx transaction.TransactorRepo,
+	ch *amqp.Channel,
+	) *BookingServiceImpl {
 	return &BookingServiceImpl{
-		r: r,
+		bookingRepo: bookingRepo,
+		seatRepo:    seatRepo,
+		ticketRepo:  ticketRepo,
+		tx:          tx,
+		ch: ch,
 	}
 }
 
 func (s *BookingServiceImpl) GetBookings(ctx context.Context, userId int, queryParams queryparams.QueryParams) (*pagination.Pagination, error) {
 	queryparams.CheckLimit(&queryParams)
 
-	users, totalUsers, err := s.r.GetBookings(ctx, userId, queryParams)
+	users, totalUsers, err := s.bookingRepo.GetBookings(ctx, userId, queryParams)
 	if err != nil {
 		return nil, err
 	}
 
 	totalPage := totalUsers / queryParams.Limit
-	if totalUsers % queryParams.Limit != 0 {
+	if totalUsers%queryParams.Limit != 0 {
 		totalPage += 1
 	}
 	queryparams.CheckPage(&queryParams, totalPage)
@@ -43,4 +72,74 @@ func (s *BookingServiceImpl) GetBookings(ctx context.Context, userId int, queryP
 	}
 
 	return &pagination, nil
+}
+
+func (s *BookingServiceImpl) AddBookings(ctx context.Context, bookingReq dto.AddBookingReq) error {
+	err := s.tx.WithinTransaction(ctx, func(txCtx context.Context) error {
+		booking := converter.GetBookingsConverter{}.ToEntity(bookingReq)
+		booking.Status = "PENDING"
+		booking.BookingTime = time.Now()
+
+		if err := s.bookingRepo.AddBookings(txCtx, &booking); err != nil {
+			return err
+		}
+
+		tickets := []entity.Ticket{}
+		seatNumbers := []string{}
+		for _, ticketDto := range bookingReq.Tickets {
+			ticket := converter.TicketConverter{}.ToEntity(ticketDto)
+			log.Println("kosongkah UUID? ", booking.Id)
+			ticket.BookingId = booking.Id
+			tickets = append(tickets, ticket)
+			seatNumbers = append(seatNumbers, ticket.SeatNumber)
+		}
+
+		isSeatsAvailable, err := s.seatRepo.IsSeatsAvailable(txCtx, bookingReq.ScheduleId, seatNumbers)
+		if err != nil {
+			return err
+		}
+		if !isSeatsAvailable {
+			return apperror.NewErrStatusBadRequest(constant.ADD_BOOKINGS, apperror.ErrSeatIsReserved, err)
+		}
+
+		err = s.seatRepo.UpdateSeatStatus(txCtx, booking.ScheduleId, seatNumbers, "RESERVED")
+		if err != nil {
+			return err
+		}
+
+		err = s.ticketRepo.AddTickets(ctx, booking.Id, tickets)
+		if err != nil {
+			return err
+		}
+
+		go s.PublishBookingTimeout(booking.Id)
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	
+
+	return nil
+}
+
+func (s *BookingServiceImpl) GetBookingsById(ctx context.Context, bookingId uuid.UUID) (*dto.GetBookingReq, error) {
+	log.Println("sini masuk? 1")
+	exists := s.bookingRepo.IsBookingExists(ctx, bookingId)
+	if !exists {
+		return nil, apperror.NewErrStatusBadRequest(constant.GET_BOOKING_BY_ID, apperror.ErrBookingNotExists, apperror.ErrBookingNotExists)
+	}
+
+	log.Println("sini masuk? 2")
+	booking, err := s.bookingRepo.GetBookingById(ctx, bookingId)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println("sini masuk? 3")
+	bookingDto := converter.GetBookingsConverter{}.ToDto(*booking)
+
+	return &bookingDto, nil
 }
