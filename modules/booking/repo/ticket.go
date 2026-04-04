@@ -7,12 +7,11 @@ import (
 	"flight/pkg/constant"
 	"flight/pkg/transaction"
 
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-type TicketRepo interface{
-	AddTickets(ctx context.Context, bookingId uuid.UUID, tickets []entity.Ticket) error 
+type TicketRepo interface {
+	AddTickets(ctx context.Context, tickets []entity.Ticket) error
 }
 
 type TicketRepoImpl struct {
@@ -25,7 +24,7 @@ func NewTicketRepo(db *gorm.DB) *TicketRepoImpl {
 	}
 }
 
-func (r *TicketRepoImpl) AddTickets(ctx context.Context, bookingId uuid.UUID, tickets []entity.Ticket) error {
+func (r *TicketRepoImpl) AddTickets(ctx context.Context, tickets []entity.Ticket) error {
 	db := transaction.ExtractTx(ctx)
 	if db == nil {
 		db = r.db
