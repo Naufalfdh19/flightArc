@@ -12,7 +12,6 @@ import (
 	"flight/pkg/constant"
 	"flight/pkg/pagination"
 	"flight/pkg/transaction"
-	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -40,13 +39,13 @@ func NewBookingService(
 	ticketRepo bookingRepo.TicketRepo,
 	tx transaction.TransactorRepo,
 	ch *amqp.Channel,
-	) *BookingServiceImpl {
+) *BookingServiceImpl {
 	return &BookingServiceImpl{
 		bookingRepo: bookingRepo,
 		seatRepo:    seatRepo,
 		ticketRepo:  ticketRepo,
 		tx:          tx,
-		ch: ch,
+		ch:          ch,
 	}
 }
 
@@ -88,7 +87,6 @@ func (s *BookingServiceImpl) AddBookings(ctx context.Context, bookingReq dto.Add
 		seatNumbers := []string{}
 		for _, ticketDto := range bookingReq.Tickets {
 			ticket := converter.TicketConverter{}.ToEntity(ticketDto)
-			log.Println("kosongkah UUID? ", booking.Id)
 			ticket.BookingId = booking.Id
 			tickets = append(tickets, ticket)
 			seatNumbers = append(seatNumbers, ticket.SeatNumber)
@@ -107,7 +105,7 @@ func (s *BookingServiceImpl) AddBookings(ctx context.Context, bookingReq dto.Add
 			return err
 		}
 
-		err = s.ticketRepo.AddTickets(ctx, booking.Id, tickets)
+		err = s.ticketRepo.AddTickets(txCtx, tickets)
 		if err != nil {
 			return err
 		}
@@ -120,25 +118,20 @@ func (s *BookingServiceImpl) AddBookings(ctx context.Context, bookingReq dto.Add
 		return err
 	}
 
-	
-
 	return nil
 }
 
 func (s *BookingServiceImpl) GetBookingsById(ctx context.Context, bookingId uuid.UUID) (*dto.GetBookingReq, error) {
-	log.Println("sini masuk? 1")
 	exists := s.bookingRepo.IsBookingExists(ctx, bookingId)
 	if !exists {
 		return nil, apperror.NewErrStatusBadRequest(constant.GET_BOOKING_BY_ID, apperror.ErrBookingNotExists, apperror.ErrBookingNotExists)
 	}
 
-	log.Println("sini masuk? 2")
 	booking, err := s.bookingRepo.GetBookingById(ctx, bookingId)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Println("sini masuk? 3")
 	bookingDto := converter.GetBookingsConverter{}.ToDto(*booking)
 
 	return &bookingDto, nil
