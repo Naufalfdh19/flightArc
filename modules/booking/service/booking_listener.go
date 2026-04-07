@@ -12,7 +12,7 @@ import (
 
 func (s *BookingServiceImpl) CheckExpiredBooking() error {
 	msgs, _ := s.ch.Consume(constant.DeadLetterQueue, "", false, false, false, false, nil)
-	log.Println("kesini gak?")
+
 	var err error
 	for d := range msgs {
 		var bookingID uuid.UUID
@@ -39,7 +39,7 @@ func (s *BookingServiceImpl) CheckExpiredBooking() error {
 			}
 			return nil
 		})
-		if err != nil {
+		if err == nil {
 			d.Ack(false)
 		} else {
 			d.Nack(false, true)
