@@ -4,14 +4,11 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-var Channel *amqp.Channel
-
-func Connect(url string) error {
+func Connect(url string) (*amqp.Connection, error) {
 	conn, err := amqp.Dial(url)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	Channel, err = conn.Channel()
-	return err
+	return conn, err
 }
