@@ -1,11 +1,11 @@
 package constant
 
 const (
-	Exchange        = "bookings.exchange"
-	Queue           = "bookings.queue"
-	DeadLetterQueue = "bookings.dlq"
+	Exchange        = "booking.exchange"
+	Queue           = "booking.queue"
+	DeadLetterQueue = "booking.dlq"
 
-	EventCreated   = "bookings.created"
-	EventCancelled = "bookings.cancelled"
-	EventExpired = "bookings.expired"
+	EventCreated   = "booking.created"
+	EventCancelled = "booking.cancelled"
+	EventExpired = "booking.expired"
 )
