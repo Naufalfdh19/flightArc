@@ -2,51 +2,39 @@ package transaction
 
 import (
 	"context"
-	"database/sql"
+
+	"gorm.io/gorm"
 )
 
 type TransactorRepo interface {
-	WithinTransaction(context.Context, func(context.Context) error) error
+	WithinTransaction(ctx context.Context, fn func(txCtx context.Context) error) error
 }
 
 type TransactorRepoImpl struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
 type TxKey struct{}
 
-func NewTransactorRepo(dbConn *sql.DB) TransactorRepoImpl {
+func NewTransactorRepo(dbConn *gorm.DB) TransactorRepoImpl {
 	return TransactorRepoImpl{
 		db: dbConn,
 	}
 }
 
-func (t *TransactorRepoImpl) WithinTransaction(ctx context.Context, fn func(txCtx context.Context) error) error {
-	tx, err := t.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-
-	err = fn(injectTx(ctx, tx))
-	if err != nil {
-		if errRollback := tx.Rollback(); errRollback != nil {
-			return err
-		}
-		return err
-	}
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-	return nil
+func (t TransactorRepoImpl) WithinTransaction(ctx context.Context, fn func(txCtx context.Context) error) error {
+	return t.db.Transaction(func(tx *gorm.DB) error {
+		ctxWithTx := InjectTx(ctx, tx)
+		return fn(ctxWithTx)
+	})
 }
 
-func injectTx(ctx context.Context, tx *sql.Tx) context.Context {
+func InjectTx(ctx context.Context, tx *gorm.DB) context.Context {
 	return context.WithValue(ctx, TxKey{}, tx)
 }
 
-func ExtractTx(ctx context.Context) *sql.Tx {
-	if tx, ok := ctx.Value(TxKey{}).(*sql.Tx); ok {
+func ExtractTx(ctx context.Context) *gorm.DB {
+	if tx, ok := ctx.Value(TxKey{}).(*gorm.DB); ok {
 		return tx
 	}
 	return nil
