@@ -15,7 +15,7 @@ import (
 type SeatRepo interface {
 	IsSeatsAvailable(ctx context.Context, scheduleId uuid.UUID, seatNumbers []string) (bool, error) 
 	UpdateSeatStatus(ctx context.Context, scheduleId uuid.UUID, seatNumbers []string, status string) error 
-	GetReservedSeatNumbers(ctx context.Context, scheduleId uuid.UUID) ([]string, error) 
+	GetSeatNumbersByBookingId(ctx context.Context, scheduleId uuid.UUID) ([]string, error) 
 }
 
 type SeatRepoImpl struct {
@@ -69,7 +69,7 @@ func (r *SeatRepoImpl) UpdateSeatStatus(ctx context.Context, scheduleId uuid.UUI
 	return nil
 }
 
-func (r *SeatRepoImpl) GetReservedSeatNumbers(ctx context.Context, scheduleId uuid.UUID) ([]string, error) {
+func (r *SeatRepoImpl) GetSeatNumbersByBookingId(ctx context.Context, scheduleId uuid.UUID) ([]string, error) {
     var seatNumbers []string
 
     err := r.db.WithContext(ctx).
