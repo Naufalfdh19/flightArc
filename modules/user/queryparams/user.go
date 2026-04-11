@@ -3,11 +3,15 @@ package queryparams
 import "fmt"
 
 type QueryParams struct {
+	SortBy string
+	Order string
 	Page  int
 	Limit int
 }
 
 type QueryParamsDto struct {
+	SortBy string `form:"sort_by,default=created_at"`
+	Order string `form:"order,default=desc"`
 	Page  int `form:"page"`
 	Limit int `form:"limit"`
 }
@@ -16,6 +20,8 @@ type QueryParamsConverter struct{}
 
 func (c QueryParamsConverter) ConvertDtoToEntity(queryparamsDto QueryParamsDto) QueryParams {
 	return QueryParams{
+		SortBy: queryparamsDto.SortBy,
+		Order: queryparamsDto.Order,
 		Page:  queryparamsDto.Page,
 		Limit: queryparamsDto.Limit,
 	}
