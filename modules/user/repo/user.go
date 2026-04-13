@@ -7,6 +7,7 @@ import (
 	"flight/pkg/apperror"
 	"flight/pkg/common"
 	"flight/pkg/constant"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -47,6 +48,7 @@ func (r userRepoImpl) GetUsers(ctx context.Context, queryParams queryparams.Quer
     err := query.
         Select("id", "name", "email", "phone_number", "role").
         Scopes(common.Paginate(queryParams.Page, queryParams.Limit, int(total))).
+		Order(fmt.Sprintf("%s %s", queryParams.SortBy, queryParams.Order)).
         Find(&users).Error
     if err != nil {
         return nil, 0, apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
