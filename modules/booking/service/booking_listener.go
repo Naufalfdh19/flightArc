@@ -11,26 +11,47 @@ import (
 )
 
 func (s *BookingServiceImpl) CheckExpiredBooking() error {
-	msgs, _ := s.ch.Consume(DeadLetterQueue, "", false, false, false, false, nil)
+	if s.ch == nil {
+		return nil
+	}
 
-	var err error
+	msgs, err := s.ch.Consume(DeadLetterQueue, "", false, false, false, false, nil)
+	if err != nil {
+		return err
+	}
+
 	for d := range msgs {
 		var bookingID uuid.UUID
-		json.Unmarshal(d.Body, &bookingID)
+		if err := json.Unmarshal(d.Body, &bookingID); err != nil {
+			d.Nack(false, false)
+			continue
+		}
+
 		err = s.tx.WithinTransaction(context.Background(), func(txCtx context.Context) error {
-			booking, _ := s.bookingRepo.GetBookingById(txCtx, bookingID)
+			booking, err := s.bookingRepo.GetBookingById(txCtx, bookingID)
+			if err != nil {
+				return err
+			}
 
 			if booking.Status == "PENDING" {
-				s.bookingRepo.UpdateBooking(txCtx, entity.Booking{Id: bookingID, Status: "EXPIRED"})
+				if err := s.bookingRepo.UpdateBooking(txCtx, entity.Booking{Id: bookingID, Status: "EXPIRED"}); err != nil {
+					return err
+				}
 
 				seatNumbers, err := s.seatRepo.GetSeatNumbersByBookingId(txCtx, bookingID)
 				if err != nil {
 					return err
 				}
 
-				s.seatRepo.UpdateSeatStatus(txCtx, booking.ScheduleId, seatNumbers, "AVAILABLE")
+				if len(seatNumbers) == 0 {
+					return nil
+				}
 
-				log.Printf("Booking %s telah otomatis dibatalkan", bookingID)
+				if err := s.seatRepo.UpdateSeatStatus(txCtx, booking.ScheduleId, seatNumbers, "AVAILABLE"); err != nil {
+					return err
+				}
+
+				log.Printf("Booking %s automatically canceled", bookingID)
 			}
 			return nil
 		})
