@@ -96,6 +96,10 @@ func (c BookingController) GetBookingsById(ctx *gin.Context) {
 	}
 
 	bookingDto, err := c.s.GetBookingsById(ctx, idParam)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	ctx.JSON(http.StatusOK, wrapper.Response(bookingDto, nil, ""))
 }
