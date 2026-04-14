@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	bookingEntity "flight/modules/booking/entity"
 	"flight/modules/schedule/entity"
 	"flight/pkg/apperror"
 	"flight/pkg/constant"
@@ -15,7 +16,7 @@ import (
 type SeatRepo interface {
 	IsSeatsAvailable(ctx context.Context, scheduleId uuid.UUID, seatNumbers []string) (bool, error) 
 	UpdateSeatStatus(ctx context.Context, scheduleId uuid.UUID, seatNumbers []string, status string) error 
-	GetSeatNumbersByBookingId(ctx context.Context, scheduleId uuid.UUID) ([]string, error) 
+	GetSeatNumbersByBookingId(ctx context.Context, bookingId uuid.UUID) ([]string, error) 
 }
 
 type SeatRepoImpl struct {
@@ -69,19 +70,22 @@ func (r *SeatRepoImpl) UpdateSeatStatus(ctx context.Context, scheduleId uuid.UUI
 	return nil
 }
 
-func (r *SeatRepoImpl) GetSeatNumbersByBookingId(ctx context.Context, scheduleId uuid.UUID) ([]string, error) {
-    var seatNumbers []string
+func (r *SeatRepoImpl) GetSeatNumbersByBookingId(ctx context.Context, bookingId uuid.UUID) ([]string, error) {
+	var seatNumbers []string
 
-    err := r.db.WithContext(ctx).
-        Model(&entity.Seat{}).
-        Where("schedule_id = ? AND status = ?", scheduleId, "RESERVED").
-        // Pluck akan mengambil kolom 'seat_number' dan mengisi slice 'seatNumbers'
-        Pluck("seat_number", &seatNumbers). 
-        Error
+	db := transaction.ExtractTx(ctx)
+	if db == nil {
+		db = r.db
+	}
 
-    if err != nil {
-        return nil, err
-    }
+	err := db.WithContext(ctx).
+		Model(&bookingEntity.Ticket{}).
+		Where("booking_id = ? AND deleted_at IS NULL", bookingId).
+		Pluck("seat_number", &seatNumbers).
+		Error
+	if err != nil {
+		return nil, apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
+	}
 
-    return seatNumbers, nil
+	return seatNumbers, nil
 }
