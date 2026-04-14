@@ -10,6 +10,11 @@ import (
 )
 
 func (s *BookingServiceImpl) PublishBookingTimeout(bookingID uuid.UUID) error {
+	if s.ch == nil {
+		log.Printf("Skipping booking timeout publish for %s because RabbitMQ is not configured", bookingID)
+		return nil
+	}
+
 	// Konversi UUID ke JSON byte
 	body, err := json.Marshal(bookingID)
 	if err != nil {
