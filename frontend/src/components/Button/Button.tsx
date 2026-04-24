@@ -5,12 +5,13 @@ import { BTN_HEIGHT_MD, BTN_HEIGHT_SM, BTN_HEIGHT_XS, BTN_WIDTH_MD, BTN_WIDTH_SM
 
 interface ButtonProps {
     children: ReactNode
-    height?: "xs" | "sm" | "md" | "l" | "xl"
-    width?: "xs" | "sm" | "md" | "l" | "xl"
-    type?:  "dark-gold" | "black"
-    square?: "half" | "full"
-    border?: "white-1"
-    onClick?: () => void
+    height?: "xs" | "sm" | "md" | "l" | "xl" | (string & {});
+    width?: "xs" | "sm" | "md" | "l" | "xl" | (string & {});
+    type?:  "dark-gold" | "black";
+    square?: (string & {});
+    border?: "white-1" | (string & {});
+    onClick?: () => void;
+    isSubmit?: boolean
 }
 
 
@@ -20,44 +21,56 @@ export default function Button({
     width, 
     square,
     border,
+    onClick,
     type,
+    isSubmit, 
 }: ButtonProps) {
-
-    let btnType = "bg-[#ac8743] text-primary-white"
-    let btnHeight = BTN_HEIGHT_XS
-    let btnWidth = BTN_WIDTH_XS
-    let btnBorder = ""
-    let btnSquare = ""
     
-    if (type === "dark-gold") {
-        btnType = "bg-[#523a0d] text-amber-50"
-    } else if (type === "black") {
-        btnType = "bg-black text-amber-50"
+    const typeClasses = {
+        "dark-gold": "bg-[#523a0d] text-amber-50",
+        "black": "bg-black text-amber-50"
     }
 
-    if (height === "sm") {
-        btnHeight = BTN_HEIGHT_SM
-    } else if (height === "md") {
-        btnHeight = BTN_HEIGHT_MD
+    const heightClasses = {
+        xs: BTN_HEIGHT_XS,
+        sm: BTN_HEIGHT_SM,
+        md: BTN_HEIGHT_MD,
+        l: "h-12",
+        xl: "h-16"
+    };
+
+    const widthClasses = {
+        xs: BTN_WIDTH_XS,
+        sm: BTN_WIDTH_SM,
+        md: BTN_WIDTH_MD,
+        l: "w-40",
+        xl: "w-56"
+    };
+
+    const borderClasses = {
+        "white-1": "border-1 border-amber-50"
     }
 
-    if (width === "sm") {
-        btnWidth = BTN_WIDTH_SM
-    } else if (width === "md") {
-        btnWidth = BTN_WIDTH_MD
-    }
+    const squareClasses = {
+        full: "rounded-full",
+        md: "rounded-md",
+        sm: "rounded-sm",
+        none: "rounded-none",
+    } ;
 
-    if (square === "full") {
-        btnSquare = "rounded-full"
-    }
-
-    if (border === "white-1") {
-        btnBorder= "border-1 border-amber-50"
-    }
+    const btnType = type ? typeClasses[type] : "bg-[#ac8743] text-primary-white"
+    const btnHeight = height ? heightClasses[height as keyof typeof heightClasses] : BTN_HEIGHT_XS;
+    const btnWidth = width ? widthClasses[width as keyof typeof widthClasses] : BTN_WIDTH_XS;
+    const btnBorder = border ? borderClasses[border as keyof typeof borderClasses] : "";
+    const btnSquare = square ? squareClasses[square as keyof typeof squareClasses] : "";
 
     return (
         <>
-            <button className={`${btnHeight} ${btnWidth} ${btnType} ${btnSquare} ${btnBorder}`}>
+            <button 
+                className={`${btnHeight} ${btnWidth} ${btnType} ${btnSquare} ${btnBorder}`} 
+                onClick={onClick}
+                type={isSubmit ? "submit" : "button"}
+            >
                 {children}
             </button>
         </>
