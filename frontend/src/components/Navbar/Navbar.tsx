@@ -1,6 +1,15 @@
+import { useNavigate } from "react-router-dom"
 import Button from "../Button/Button"
 
 function Navbar() {
+
+    const navigate = useNavigate();
+
+    // Function to navigate to the About page
+    const goToAboutPage = () => {
+        navigate("/login");
+    };
+
     return (
         <>  
             <div className="h-18 w-full flex bg-black">
@@ -19,10 +28,10 @@ function Navbar() {
                 <div className="h-full w-140 flex items-center justify-center gap-5 border-amber-50 ">
                     {/* <button className="h-10 w-23 text-amber-50 bg-[#ac8743]  rounded-full">Log In</button>
                     <button className="h-10 w-23 text-amber-50 bg-[#523a0d]  rounded-full">Register</button> */}
-                    <Button square="full">
+                    <Button square="full" onClick={goToAboutPage}>
                         Log In
                     </Button>
-                    <Button type="dark-gold" square="full">
+                    <Button type="primary-700" square="full">
                         Register
                     </Button>
                 </div>
