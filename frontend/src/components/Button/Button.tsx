@@ -7,7 +7,7 @@ interface ButtonProps {
     children: ReactNode
     height?: "xs" | "sm" | "md" | "l" | "xl" | (string & {});
     width?: "xs" | "sm" | "md" | "l" | "xl" | (string & {});
-    type?:  "dark-gold" | "black";
+    type?:  "primary-700" | "black";
     square?: (string & {});
     border?: "white-1" | (string & {});
     onClick?: () => void;
@@ -27,7 +27,7 @@ export default function Button({
 }: ButtonProps) {
     
     const typeClasses = {
-        "dark-gold": "bg-[#523a0d] text-amber-50",
+        "primary-700": "bg-amber-900 text-amber-50",
         "black": "bg-black text-amber-50"
     }
 
@@ -58,16 +58,22 @@ export default function Button({
         none: "rounded-none",
     } ;
 
-    const btnType = type ? typeClasses[type] : "bg-[#ac8743] text-primary-white"
+    const hoverClasses = {
+        "primary-700": "hover:bg-amber-500 hover:text-black",
+        "black": "hover:bg-amber-50"
+    }
+
+    const btnType = type ? typeClasses[type] : "bg-amber-500 text-primary-white"
     const btnHeight = height ? heightClasses[height as keyof typeof heightClasses] : BTN_HEIGHT_XS;
     const btnWidth = width ? widthClasses[width as keyof typeof widthClasses] : BTN_WIDTH_XS;
     const btnBorder = border ? borderClasses[border as keyof typeof borderClasses] : "";
     const btnSquare = square ? squareClasses[square as keyof typeof squareClasses] : "";
+    const btnHover = type ? hoverClasses[type] : "hover:bg-amber-300"; 
 
     return (
         <>
             <button 
-                className={`${btnHeight} ${btnWidth} ${btnType} ${btnSquare} ${btnBorder}`} 
+                className={`${btnHeight} ${btnWidth} ${btnType} ${btnSquare} ${btnBorder} ${btnHover} cursor-pointer`} 
                 onClick={onClick}
                 type={isSubmit ? "submit" : "button"}
             >
