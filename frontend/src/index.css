@@ -1,0 +1,30 @@
+/* globals.css */
+@import "tailwindcss";
+
+@theme {
+  /* ── Primary: Golden Amber ── */
+  --color-amber-50:  #fdf6ec;
+  --color-amber-100: #fbecd4;
+  --color-amber-200: #f2d9a0;
+  --color-amber-300: #e8c98a;
+  --color-amber-500: #ac8743; /* ★ brand */
+  --color-amber-700: #7a5e28;
+  --color-amber-900: #3d2c10;
+
+  /* ── Warm Neutral: Greige ── */
+  --color-greige-50:  #f7f4f0;
+  --color-greige-200: #e2dbd2;
+  --color-greige-400: #b5aa9b;
+  --color-greige-600: #7d7267;
+  --color-greige-800: #3e3830;
+
+  /* ── Accent: Deep Teal ── */
+  --color-teal-100: #d4eeea;
+  --color-teal-400: #3a9e90;
+  --color-teal-700: #1e6b60;
+
+  /* ── Dark Surface: Espresso ── */
+  --color-espresso-800: #2c231a;
+  --color-espresso-900: #1a1410;
+  --color-cream:        #f0d9a8;
+}
