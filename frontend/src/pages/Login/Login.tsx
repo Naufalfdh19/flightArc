@@ -2,6 +2,9 @@
 import React, { useState } from "react"
 import Button from "../../components/Button/Button"
 import { useNavigate } from "react-router-dom"
+import useFetch from "../../hooks/useFetch";
+import type { Base } from "../../object-types/types";
+import type { LoginRequest } from "../../object-types/request/loginPage";
 
 export default function Login() {
     const navigate = useNavigate();
@@ -9,23 +12,25 @@ export default function Login() {
     const [email, setEmail ] = useState("")
     const [password, setPassword] = useState("")
 
+    const { data, error, isLoading, fetchData } = useFetch<Base<LoginRequest>>("http://localhost:9000/api/v1/user/auth/login")
+
     async function loginSubmit(e: React.FormEvent) {
         e.preventDefault();
-        console.log({email, password})
-        const res = await fetch("http://localhost:9000/api/v1/user/auth/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                email: email,
-                password: password,
-            })
-        })
 
-        const resData = await res.json()
-        
-        console.log(resData)
+        await fetchData(
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            }
+        )
+
+        console.log(data, error, isLoading)
     }
 
     return (
