@@ -12,3 +12,10 @@ export const BTN_WIDTH_SM = "w-28";    // 112px
 export const BTN_WIDTH_MD = "w-36";    // 144px
 export const BTN_WIDTH_LG = "w-48";    // 192px
 export const BTN_WIDTH_XL = "w-64";    // 256px
+
+
+export const METHOD_GET = "GET";
+export const METHOD_POST = "POST";
+export const METHOD_PUT = "PUT";
+export const METHOD_PATCH = "PATCH";
+export const METHOD_DELETE = "DELETE";
