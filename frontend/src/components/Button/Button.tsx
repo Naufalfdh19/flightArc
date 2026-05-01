@@ -60,7 +60,7 @@ export default function Button({
 
     const hoverClasses = {
         "primary-700": "hover:bg-amber-500 hover:text-black",
-        "black": "hover:bg-amber-50"
+        "black": "hover:bg-amber-300"
     }
 
     const btnType = type ? typeClasses[type] : "bg-amber-500 text-primary-white"
