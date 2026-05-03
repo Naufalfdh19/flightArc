@@ -59,7 +59,7 @@ export default function Button({
     } ;
 
     const hoverClasses = {
-        "primary-700": "hover:bg-amber-500 hover:text-black",
+        "primary-700": "hover:bg-amber-300 hover:text-black",
         "black": "hover:bg-amber-300"
     }
 
