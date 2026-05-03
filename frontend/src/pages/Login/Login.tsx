@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom"
 import useFetch from "../../hooks/useFetch";
 import type { Base } from "../../object-types/types";
 import type { LoginRequest } from "../../object-types/request/loginPage";
+import { METHOD_POST } from "../../const/const";
+import loginImage from  "../../assets/login-register-section.jpeg"
 
 export default function Login() {
     const navigate = useNavigate();
@@ -19,8 +21,9 @@ export default function Login() {
 
         await fetchData(
             {
-                method: "POST",
+                method: METHOD_POST,
                 headers: {
+
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
@@ -30,16 +33,18 @@ export default function Login() {
             }
         )
 
-        console.log(data, error, isLoading)
+        if (!data?.error) {
+            navigate("/")
+        }
     }
 
     return (
         <>
             <div className="h-screen w-screen flex">
-                <div className="h-full w-1/2 bg-amber-500"></div>
-                <div className="h-full w-1/2 bg-black flex items-center justify-center">
-                    <div className="h-[75%] w-[75%]">
-                        <p className="text-[#ac8743]">Welcome Back</p>
+                <img className="h-screen hidden md:block" src={loginImage} alt="" />
+                <div className="h-full w-full bg-black flex items-center justify-center">
+                    <div className="max-h-lg max-w-2xl p-10 m:p-5">
+                        <p className="text-amber-500">Welcome Back</p>
                         <p className="mt-2 mb-5 text-amber-50 text-6xl">Sign in to your account</p>
                         <span className="text-amber-50">New to ArcFlight? </span> 
                         <span 
