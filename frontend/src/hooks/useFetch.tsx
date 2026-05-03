@@ -6,29 +6,35 @@ export  default function useFetch<tData>(
     url: string
 ) {
     const [data, setData] = useState<tData>()
-    const [error, setError] = useState<Err>()
-    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<Err | Error>()
+    const [isLoading, setIsLoading] = useState(false)
 
 
     const fetchData = useCallback(
         async (options?: RequestInit) => {
+            setIsLoading(true)
             setError(undefined)
             
-            const res = await fetch(
-                url, options
-            );
+            try {
+                const res = await fetch(
+                    url, options
+                 );
             
-            const resData = await res.json()
+                const resData = await res.json()
+                setData(resData)
 
-            setData(resData)
-            
-            setIsLoading(false);
+            }  catch (err) {
+                setError(err instanceof Error ? err : new Error(String(err)));
+            } finally {
+                setIsLoading(false);
+            }
+
             
         }, [url])
 
-        useEffect(() => {
-            fetchData();
-        }, [fetchData])
+    useEffect(() => {
+        fetchData();
+    }, [fetchData])
 
     return {data, error, isLoading, fetchData}
 }
