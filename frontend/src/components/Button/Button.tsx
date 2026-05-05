@@ -7,7 +7,7 @@ interface ButtonProps {
     children: ReactNode
     height?: "xs" | "sm" | "md" | "l" | "xl" | (string & {});
     width?: "xs" | "sm" | "md" | "l" | "xl" | (string & {});
-    type?:  "primary-700" | "black";
+    type?:  "primary-700" | "black" | "black-op-10";
     square?: (string & {});
     border?: "white-1" | (string & {});
     onClick?: () => void;
@@ -28,7 +28,8 @@ export default function Button({
     
     const typeClasses = {
         "primary-700": "bg-amber-900 text-amber-50",
-        "black": "bg-black text-amber-50"
+        "black": "bg-black text-amber-50",
+        "black-op-10": "bg-black/10 text-amber-50"
     }
 
     const heightClasses = {
@@ -60,7 +61,8 @@ export default function Button({
 
     const hoverClasses = {
         "primary-700": "hover:bg-amber-300 hover:text-black",
-        "black": "hover:bg-amber-300"
+        "black": "hover:bg-amber-300",
+        "black-op-10": "hover:bg-black/0"
     }
 
     const btnType = type ? typeClasses[type] : "bg-amber-500 text-primary-white"
