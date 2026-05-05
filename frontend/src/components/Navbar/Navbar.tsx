@@ -7,7 +7,7 @@ function Navbar() {
 
     return (
         <>  
-            <div className="h-18 w-full flex bg-black">
+            <div className="h-18 w-full flex bg-ink">
                 {/* Logo & Brand */}
                 <div className="w-100 flex h-full items-center justify-center border-amber-50">
                     <h1 className="text-amber-50 text-2xl">FlightArc</h1>
