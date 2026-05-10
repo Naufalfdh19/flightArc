@@ -4,6 +4,7 @@ import heroImage from  "../../assets/hero-section.jpeg"
 import Button from "../../components/ui/Button"
 import Metrics from "../../components/ui/Metrics"
 import { SectionWrapper } from "../../components/wrapper/SectionWrapper"
+import Card from "../../components/ui/Card"
 
 function HomePage() {
     return (
@@ -55,8 +56,8 @@ function HomePage() {
                     <Metrics logo="✈️">Instant <span className="text-gray-400">E-ticket delivery</span></Metrics>
                 </div>
                 <SectionWrapper
-                    eyebrow="Trending Now"
-                    title={<>Destinations<br />worth the journey</>}
+                    eyebrow="BROWSE SERVICES"
+                    title={<>What are you <br></br>looking for?</>}
                     seeAllHref="/destinations"
                     className="bg-ink"
                 >
@@ -66,6 +67,24 @@ function HomePage() {
                         <Button height="sm" width="lg" square="full">✈️ Flights</Button>
                         <Button height="sm" width="lg" square="full">✈️ Flights</Button>
                         <Button height="sm" width="lg" square="full">✈️ Flights</Button>
+                    </div>
+                </SectionWrapper>
+                <SectionWrapper
+                    eyebrow="Trending Now"
+                    title={<>Destinations<br />worth the journey</>}
+                    seeAllHref="/destinations"
+                    className="bg-ink"
+                >
+                    <div className="flex gap-5">
+                        <Card className="bg-green-700 rounded-[20px]" height="md" width="xs">
+                            <div className="h-full flex flex-col justify-between items-end">
+                                <Card className="bg-black w-20 h-3"></Card>
+                                <div className="bg-black w-full h-30">
+                                    
+                                </div>
+                            </div>
+                            
+                        </Card>
                     </div>
                 </SectionWrapper>
             </div>
