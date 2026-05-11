@@ -36,7 +36,7 @@ export default function Register() {
                 <div className="h-full w-1/2 bg-amber-500"></div>
                 <div className="h-full w-1/2 bg-black flex items-center justify-center">
                     <div className="h-[75%] w-[75%]">
-                        <p className="text-[#ac8743]">Welcome Back</p>
+                        <p className="text-amber-500">Welcome Back</p>
                         <p className="mt-2 mb-5 text-amber-50 text-6xl">Sign up your account</p>
                         <span className="text-amber-50">Already have an account? </span> 
                         <span 
