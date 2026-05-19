@@ -29,10 +29,11 @@ func (c ScheduleController) GetFlights(ctx *gin.Context) {
 	var queryParamsDto queryparams.QueryParamsDto
 
 	if err := ctx.ShouldBindQuery(&queryParamsDto); err != nil {
-		err = apperror.NewErrInternalServerError(constant.GET_USERS, apperror.ErrBindingRequest, apperror.ErrBindingRequest)
+		err = apperror.NewErrInternalServerError(constant.GET_FLIGHTS, apperror.ErrBindingRequest, apperror.ErrBindingRequest)
 		ctx.Error(err)
 		return
 	}
+
 	queryParams := queryparams.QueryParamsConverter{}.ConvertDtoToEntity(queryParamsDto)
 
 	flightsPagination, err := c.s.GetFlights(ctx, queryParams)
