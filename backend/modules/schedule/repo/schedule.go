@@ -45,10 +45,11 @@ func (r ScheduleRepoImpl) GetFlights(ctx context.Context, queryParams queryparam
 				FROM schedules s
 				LEFT JOIN airports org ON s.origin_code = org.code
 				LEFT JOIN airports dst ON s.destination_code = dst.code
-				WHERE s.deleted_at IS NULL`
+				WHERE s.deleted_at IS NULL AND org.deleted_at IS NULL AND dst.deleted_at IS NULL`
 
-	log.Print(queryParams.Page, queryParams.Limit)
+	query += queryparams.AddFilter(queryParams)
 	query += queryparams.AddPagination(queryParams)
+	log.Println(query)
 
 	rows, err := r.db.Raw(query).Rows()
 	if err != nil {
@@ -88,9 +89,9 @@ func (r ScheduleRepoImpl) GetTotalSchedule(ctx context.Context) (int, error) {
 				FROM schedules
 				WHERE deleted_at IS NULL`
 
-	err := r.db.Raw(query).Scan(&totalSchedule)
+	err := r.db.Raw(query).Scan(&totalSchedule).Error
 	if err != nil {
-		return 0, apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err.Error)
+		return 0, apperror.NewErrInternalServerError(constant.SERVER, apperror.ErrInternalServerError, err)
 	}
 
 	return totalSchedule, nil
