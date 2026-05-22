@@ -42,8 +42,8 @@ export default function DestinationCard({
         xl: CARD_WIDTH_XL
     };
 
-    const cardHeight = height ? heightClasses[height as keyof typeof heightClasses] : CARD_HEIGHT_MD;
-    const cardWidth = width ? widthClasses[width as keyof typeof widthClasses] : CARD_WIDTH_XS;
+    const cardHeight = height ? heightClasses[height as keyof typeof heightClasses] : CARD_HEIGHT_SM;
+    const cardWidth = width ? widthClasses[width as keyof typeof widthClasses] : CARD_WIDTH_SM;
 
 
     return (
@@ -53,8 +53,8 @@ export default function DestinationCard({
                 style={{ backgroundImage: `url(${bgImage})` }}
             >
                 <div className="bg-black w-12.5 h-5"></div>
-                <div className="bg-black w-full h-40">
-                    <span className="inline-block bg-[#C8A96E]/25 border border-[#C8A96E]/40 text-[#C8A96E] text-[9px] tracking-[1.5px] uppercase px-2.5 py-0.5 rounded-full mb-1.5">
+                <div className="w-full h-40 flex flex-col justify-end">
+                    <span className="w-20 inline-block bg-[#C8A96E]/25 border border-[#C8A96E]/40 text-[#C8A96E] text-[9px] tracking-[1.5px] uppercase px-2.5 py-0.5 rounded-full mb-1.5">
                         {country}
                     </span>
                     {/* City name */}
