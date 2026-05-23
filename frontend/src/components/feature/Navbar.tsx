@@ -23,10 +23,10 @@ function Navbar() {
                 <div className="h-full w-140 flex items-center justify-center gap-5 border-amber-50 ">
                     {/* <button className="h-10 w-23 text-amber-50 bg-[#ac8743]  rounded-full">Log In</button>
                     <button className="h-10 w-23 text-amber-50 bg-[#523a0d]  rounded-full">Register</button> */}
-                    <Button onClick={() => navigate("/login")} square="full">
+                    <Button width="xs" onClick={() => navigate("/login")} square="full">
                         Log In
                     </Button>
-                    <Button onClick={() => navigate("/register")} type="primary-700" square="full">
+                    <Button width="xs" onClick={() => navigate("/register")} type="primary-700" square="full">
                         Register
                     </Button>
                 </div>
