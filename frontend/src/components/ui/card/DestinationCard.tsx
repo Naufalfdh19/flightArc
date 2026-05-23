@@ -1,4 +1,4 @@
-import { CARD_HEIGHT_LG, CARD_HEIGHT_MD, CARD_HEIGHT_SM, CARD_HEIGHT_XL, CARD_HEIGHT_XS, CARD_WIDTH_LG, CARD_WIDTH_MD, CARD_WIDTH_SM, CARD_WIDTH_XL, CARD_WIDTH_XS } from "../../../const/const";
+import { CARD_HEIGHT_LG, CARD_HEIGHT_MD, CARD_HEIGHT_SM, CARD_HEIGHT_XL, CARD_HEIGHT_XS, CARD_WIDTH_FULL, CARD_WIDTH_LG, CARD_WIDTH_MD, CARD_WIDTH_SM, CARD_WIDTH_XL, CARD_WIDTH_XS } from "../../../const/const";
 import { cn } from "../../../utils/cn";
 
 
@@ -42,17 +42,19 @@ export default function DestinationCard({
         xl: CARD_WIDTH_XL
     };
 
-    const cardHeight = height ? heightClasses[height as keyof typeof heightClasses] : CARD_HEIGHT_SM;
-    const cardWidth = width ? widthClasses[width as keyof typeof widthClasses] : CARD_WIDTH_SM;
+    const cardHeight = height ? heightClasses[height as keyof typeof heightClasses] : CARD_HEIGHT_MD;
+    const cardWidth = width ? widthClasses[width as keyof typeof widthClasses] : CARD_WIDTH_FULL;
 
 
     return (
         <>  
             <div 
-                className={cn(`p-5 ${cardHeight} ${cardWidth} ${className} flex flex-col items-end justify-between`)}
+                className={cn(`p-5 ${cardHeight} ${cardWidth} ${className} flex flex-col items-end justify-between rounded-3xl`)}
                 style={{ backgroundImage: `url(${bgImage})` }}
             >
-                <div className="bg-black w-12.5 h-5"></div>
+                <div className="p-2 bg-black w-1/2 h-18 rounded-xl opacity-60 flex flex-col items-center justify-center">
+                    <p className="text-white text-[25px]">IDR 499K</p>
+                </div>
                 <div className="w-full h-40 flex flex-col justify-end">
                     <span className="w-20 inline-block bg-[#C8A96E]/25 border border-[#C8A96E]/40 text-[#C8A96E] text-[9px] tracking-[1.5px] uppercase px-2.5 py-0.5 rounded-full mb-1.5">
                         {country}
