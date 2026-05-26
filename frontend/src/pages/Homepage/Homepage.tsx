@@ -4,7 +4,9 @@ import heroImage from  "../../assets/hero-section.jpeg"
 import Button from "../../components/ui/Button"
 import Metrics from "../../components/ui/Metrics"
 import { SectionWrapper } from "../../components/wrapper/SectionWrapper"
-import Card from "../../components/ui/Card"
+import DestinationCard from "../../components/ui/card/DestinationCard"
+import OfferCard from "../../components/ui/card/OffersCard"
+
 
 function HomePage() {
     return (
@@ -73,18 +75,47 @@ function HomePage() {
                     eyebrow="Trending Now"
                     title={<>Destinations<br />worth the journey</>}
                     seeAllHref="/destinations"
+                    className="bg-black"
+                >
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:grid-rows-2 lg:grid-cols-4 lg:grid-rows-1">
+                        <DestinationCard className="bg-green-900" country={"INDONESIA"} city={"Bali"} rating={"4.9"} reviews={"12K"}></DestinationCard>
+                        <DestinationCard className="bg-green-900" country={"JAPAN"} city={"Tokyo"} rating={"4.8"} reviews={"8.5K"}></DestinationCard>
+                        <DestinationCard className="bg-green-900" country={"FRANCE"} city={"Paris"} rating={"4.7"} reviews={"6.2K"}></DestinationCard>
+                        <DestinationCard className="bg-green-900" country={"UAE"} city={"Dubai"} rating={"4.8"} reviews={"9K"}></DestinationCard>
+                    </div>
+                </SectionWrapper>
+                <SectionWrapper
+                    eyebrow="Limited Offers"
+                    title={<>Deals curated<br />just for you</>}
+                    seeAllHref="/destinations"
                     className="bg-ink"
                 >
-                    <div className="flex gap-5">
-                        <Card className="bg-green-700 rounded-[20px]" height="md" width="xs">
-                            <div className="h-full flex flex-col justify-between items-end">
-                                <Card className="bg-black w-20 h-3"></Card>
-                                <div className="bg-black w-full h-30">
-                                    
-                                </div>
-                            </div>
-                            
-                        </Card>
+                    <div className="grid md:grid-cols-[3fr_2fr] gap-4 min-h-150">
+                        <OfferCard link="Claim deal &rarr;" 
+                            title="Flash Sale" 
+                            offer="Up to 50% off international flights" 
+                            offerSize="text-4xl" 
+                            complementary ="Ends in 2d 14h" 
+                            detail="Hundreds of routes, incredible prices. Book before they're gone."
+                            className="bg-yellow-900"></OfferCard>
+                        <div className="grid grid-cols-1 gap-4">
+                            <OfferCard 
+                                link="Explore &rarr;"
+                                title="Staycation Special"
+                                offer="Free breakfast included"
+                                offerSize="text-2xl" 
+                                complementary="Hotels" 
+                                detail="500+ partner hotels, late checkout"
+                                className="bg-green-900"></OfferCard>
+                            <OfferCard
+                                link="Browse &rarr;"
+                                title="Weekend Escapes" 
+                                offer="Experiences from IDR 99K"
+                                offerSize="text-2xl"
+                                complementary="Activities" 
+                                detail="Tours, spas, local adventures"
+                                className="bg-red-900"></OfferCard>
+                        </div>
                     </div>
                 </SectionWrapper>
             </div>
