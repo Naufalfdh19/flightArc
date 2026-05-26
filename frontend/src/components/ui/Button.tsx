@@ -67,7 +67,7 @@ export default function Button({
 
     const btnType = type ? typeClasses[type] : "bg-amber-500 text-primary-white"
     const btnHeight = height ? heightClasses[height as keyof typeof heightClasses] : BTN_HEIGHT_XS;
-    const btnWidth = width ? widthClasses[width as keyof typeof widthClasses] : BTN_WIDTH_XS;
+    const btnWidth = width ? widthClasses[width as keyof typeof widthClasses] : "";
     const btnBorder = border ? borderClasses[border as keyof typeof borderClasses] : "";
     const btnSquare = square ? squareClasses[square as keyof typeof squareClasses] : "";
     const btnHover = type ? hoverClasses[type] : "hover:bg-amber-300"; 
