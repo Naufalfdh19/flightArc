@@ -13,16 +13,18 @@ export const BTN_WIDTH_XL = "w-64";
 // Card Heights
 export const CARD_HEIGHT_XS = "h-40";   // 160px
 export const CARD_HEIGHT_SM = "h-64";   // 256px
-export const CARD_HEIGHT_MD = "h-80";   // 320px
 export const CARD_HEIGHT_LG = "h-96";   // 384px
+export const CARD_HEIGHT_MD = "h-80";   // 320px
 export const CARD_HEIGHT_XL = "h-[28rem]"; // 448px
+export const CARD_HEIGHT_FULL = "h-full"
 
 // Card Widths
-export const CARD_WIDTH_XS = "w-60";    // 240px
+export const CARD_WIDTH_XS = "w-50";    // 200px
 export const CARD_WIDTH_SM = "w-72";    // 288px
 export const CARD_WIDTH_MD = "w-80";    // 320px
 export const CARD_WIDTH_LG = "w-96";    // 384px
 export const CARD_WIDTH_XL = "w-[32rem]"; // 512px
+export const CARD_WIDTH_FULL = "w-full"
 
 
 export const METHOD_GET = "GET";
