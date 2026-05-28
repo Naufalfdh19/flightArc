@@ -6,6 +6,8 @@ import Metrics from "../../components/ui/Metrics"
 import { SectionWrapper } from "../../components/wrapper/SectionWrapper"
 import DestinationCard from "../../components/ui/card/DestinationCard"
 import OfferCard from "../../components/ui/card/OffersCard"
+import Footer from "../../components/feature/Footer"
+import { LIMITED_OFFERS } from "../../const/data/offers"
 
 
 function HomePage() {
@@ -30,18 +32,14 @@ function HomePage() {
                             <Button type="black-op-10" border="white-1" height="sm" square="md">Flight</Button>
                         </div>
                         <div className="my-4 w-full flex gap-3 items-end">
-                            <div className="w-full max-w-30 flex flex-col items-center">
-                                <p className="text-white/30">FROM</p>
-                                <input className="w-full border border-gray-400 rounded-md" type="text" />
-                            </div>
-                            <div className="w-full max-w-30 flex flex-col items-center">
-                                <p className="text-white/30">TO</p>
-                                <input className="w-full border border-gray-400 rounded-md" type="text" />
-                            </div>
-                            <div className="w-full max-w-50 flex flex-col items-center">
-                                <p className="text-white/30">DEPART</p>
-                                <input className="w-full border border-gray-400 rounded-md" type="text" />
-                            </div>
+                            {
+                                ["FROM","TO","DEPART"].map((title) => (
+                                    <div className="w-full max-w-30 flex flex-col items-center">
+                                        <p className="text-white/30">{title}</p>
+                                        <input className="w-full border border-gray-400 rounded-md text-white" type="text" />
+                                    </div>
+                                ))
+                            }
                             <div className="absolute bottom-0 right-0 p-3">
                                 <Button type="black-op-10" border="white-1" height="sm" width="sm" square="md">Search &rarr;</Button>
                             </div>
@@ -91,33 +89,37 @@ function HomePage() {
                     className="bg-ink"
                 >
                     <div className="grid md:grid-cols-[3fr_2fr] gap-4 min-h-150">
-                        <OfferCard link="Claim deal &rarr;" 
-                            title="Flash Sale" 
-                            offer="Up to 50% off international flights" 
-                            offerSize="text-4xl" 
-                            complementary ="Ends in 2d 14h" 
-                            detail="Hundreds of routes, incredible prices. Book before they're gone."
-                            className="bg-yellow-900"></OfferCard>
-                        <div className="grid grid-cols-1 gap-4">
+                        {LIMITED_OFFERS.length > 0 && (
                             <OfferCard 
-                                link="Explore &rarr;"
-                                title="Staycation Special"
-                                offer="Free breakfast included"
-                                offerSize="text-2xl" 
-                                complementary="Hotels" 
-                                detail="500+ partner hotels, late checkout"
-                                className="bg-green-900"></OfferCard>
-                            <OfferCard
-                                link="Browse &rarr;"
-                                title="Weekend Escapes" 
-                                offer="Experiences from IDR 99K"
-                                offerSize="text-2xl"
-                                complementary="Activities" 
-                                detail="Tours, spas, local adventures"
-                                className="bg-red-900"></OfferCard>
-                        </div>
+                                cta={`${LIMITED_OFFERS[0].cta} →`} 
+                                eyebrow={LIMITED_OFFERS[0].eyebrow} 
+                                title={LIMITED_OFFERS[0].title}
+                                badge={LIMITED_OFFERS[0].badge}
+                                description={LIMITED_OFFERS[0].description}
+                                bgImage={LIMITED_OFFERS[0].background}
+                                titleSize={LIMITED_OFFERS[0].type}
+                            />
+                        )}
+
+                        {LIMITED_OFFERS.length > 1 && (
+                            <div className="flex flex-col gap-4"> 
+                                {LIMITED_OFFERS.slice(1).map((offer) => (
+                                    <OfferCard 
+                                    key={offer.id} // Key tetap aman di sini
+                                    cta={`${offer.cta} →`} 
+                                    eyebrow={offer.eyebrow} 
+                                    title={offer.title}
+                                    badge={offer.badge}
+                                    description={offer.description}
+                                    bgImage={offer.background}
+                                    titleSize={offer.type}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </SectionWrapper>
+                <Footer></Footer>
             </div>
             
         </>
