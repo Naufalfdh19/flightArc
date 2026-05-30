@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom"
-import Button from "../ui/Button"
+import Button from "../../ui/Button"
 
-function Navbar() {
+function HomeNavbar() {
 
     const navigate = useNavigate();
 
@@ -31,4 +31,4 @@ function Navbar() {
 }
 
 
-export default Navbar
+export default HomeNavbar

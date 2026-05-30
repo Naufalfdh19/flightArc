@@ -1,5 +1,5 @@
 
-import Navbar from "../../components/feature/Navbar"
+import Navbar from "../../components/feature/navbar/HomeNavbar"
 import heroImage from  "../../assets/hero-section.jpeg"
 import Button from "../../components/ui/Button"
 import Metrics from "../../components/ui/Metrics"
