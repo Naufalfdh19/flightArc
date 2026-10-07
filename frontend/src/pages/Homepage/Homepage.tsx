@@ -71,7 +71,7 @@ function HomePage() {
                 <div className="absolute inset-0 -z-20 bg-[linear-gradient(rgb(255_255_255/0.025)_1px,transparent_1px),linear-gradient(90deg,rgb(255_255_255/0.025)_1px,transparent_1px)] bg-size-[64px_64px] mask-[radial-gradient(ellipse_at_center,black,transparent_75%)]" />
 
                 <div className="mx-auto grid w-full max-w-7xl items-center gap-6 px-4 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:px-8">
-                    <div className="relative z-10 text-center lg:text-left">
+                    <div className="relative z-10 min-w-0 text-center lg:text-left">
                         <div className="glass mb-6 inline-flex animate-fade-up items-center gap-2.5 rounded-full py-1.5 pr-4 pl-2 text-sm text-cream/90">
                             <span className="relative flex h-2.5 w-2.5">
                                 <span className="absolute inline-flex h-full w-full animate-ping-slow rounded-full bg-teal-300" />
@@ -121,7 +121,7 @@ function HomePage() {
                     </div>
 
                     {/* Globe */}
-                    <div className="relative -mx-4 h-[360px] animate-fade-up [animation-delay:200ms] sm:mx-0 sm:h-[480px] lg:h-[640px]">
+                    <div className="relative -mx-4 h-[360px] min-w-0 animate-fade-up [animation-delay:200ms] sm:mx-0 sm:h-[480px] lg:h-[640px]">
                         <Globe stars />
 
                         {/* Floating flight cards */}

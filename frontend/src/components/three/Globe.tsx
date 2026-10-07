@@ -80,7 +80,15 @@ export default function Globe({ className, stars = false }: GlobeProps) {
         const isSmall = window.innerWidth < 768
 
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSmall ? 1.5 : 2))
-        renderer.domElement.style.display = "block"
+        // Canvas is sized by CSS and taken out of flow, so its pixel size can never
+        // push the layout around (which would feed back into the ResizeObserver)
+        Object.assign(renderer.domElement.style, {
+            position: "absolute",
+            inset: "0",
+            width: "100%",
+            height: "100%",
+            display: "block",
+        })
         mount.appendChild(renderer.domElement)
 
         const scene = new THREE.Scene()
@@ -231,7 +239,7 @@ export default function Globe({ className, stars = false }: GlobeProps) {
         const resize = () => {
             const { clientWidth: w, clientHeight: h } = mount
             if (!w || !h) return
-            renderer.setSize(w, h)
+            renderer.setSize(w, h, false) // false = don't write inline px width/height
             camera.aspect = w / h
             // Keep the whole globe in frame on tall/narrow containers
             camera.position.z = w / h < 1 ? 3.4 / (w / h) ** 0.75 : 3.4
@@ -304,5 +312,5 @@ export default function Globe({ className, stars = false }: GlobeProps) {
         }
     }, [stars])
 
-    return <div ref={mountRef} aria-hidden="true" className={cn("h-full w-full", className)} />
+    return <div ref={mountRef} aria-hidden="true" className={cn("relative h-full w-full overflow-hidden", className)} />
 }
