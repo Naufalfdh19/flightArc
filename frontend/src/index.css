@@ -1,30 +1,103 @@
-/* globals.css */
 @import "tailwindcss";
 
 @theme {
-  /* ── Primary: Golden Amber ── */
-  --color-amber-50:  #fdf6ec;
-  --color-amber-100: #fbecd4;
-  --color-amber-200: #f2d9a0;
-  --color-amber-300: #e8c98a;
-  --color-amber-500: #ac8743; /* ★ brand */
-  --color-amber-700: #7a5e28;
-  --color-amber-900: #3d2c10;
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
 
-  /* ── Warm Neutral: Greige ── */
-  --color-greige-50:  #f7f4f0;
-  --color-greige-200: #e2dbd2;
-  --color-greige-400: #b5aa9b;
-  --color-greige-600: #7d7267;
-  --color-greige-800: #3e3830;
+  /* ── Surfaces: midnight navy ── */
+  --color-ink:      #070a12; /* page background */
+  --color-night:    #0b1020; /* alternate section */
+  --color-surface:  #111729; /* cards */
+  --color-surface-2:#182039; /* raised / hover */
 
-  /* ── Accent: Deep Teal ── */
-  --color-teal-100: #d4eeea;
-  --color-teal-400: #3a9e90;
-  --color-teal-700: #1e6b60;
+  /* ── Brand: warm gold ── */
+  --color-gold-100: #fbf1dc;
+  --color-gold-200: #f5dfb0;
+  --color-gold-300: #eccb85;
+  --color-gold-400: #e0b062; /* ★ brand */
+  --color-gold-500: #c9953f;
+  --color-gold-600: #9c6f27;
 
-  /* ── Dark Surface: Espresso ── */
-  --color-espresso-800: #2c231a;
-  --color-espresso-900: #1a1410;
-  --color-cream:        #f0d9a8;
+  /* ── Text ── */
+  --color-cream: #f7efe0; /* headings */
+  --color-mist:  #9aa3b8; /* body / muted */
+
+  /* ── Accent (sparingly: status, ratings) ── */
+  --color-teal-300: #6fd3c1;
+  --color-teal-500: #2fa391;
+
+  --animate-fade-up: fade-up 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-ping-slow: ping-slow 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  --animate-shimmer: shimmer 6s linear infinite;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+  @keyframes ping-slow {
+    75%, 100% { transform: scale(2.2); opacity: 0; }
+  }
+  @keyframes shimmer {
+    to { background-position: 200% center; }
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-ink font-sans text-mist antialiased;
+  }
+  ::selection {
+    @apply bg-gold-400 text-ink;
+  }
+}
+
+@layer components {
+  .text-gradient-gold {
+    background: linear-gradient(100deg, var(--color-gold-200), var(--color-gold-400) 40%, var(--color-gold-200) 60%, var(--color-gold-400));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    @apply animate-shimmer;
+  }
+
+  .glass {
+    @apply border border-white/10 bg-white/[0.04] backdrop-blur-xl;
+  }
+
+  .field {
+    @apply h-12 w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 text-cream placeholder:text-mist/60
+      outline-none transition-colors duration-200
+      hover:border-white/20 focus:border-gold-400/70 focus:bg-white/[0.05];
+  }
+
+  /* Scroll reveal — toggled by <Reveal> */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1; transform: none; }
 }
