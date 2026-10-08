@@ -9,7 +9,7 @@ export const LIMITED_OFFERS = [
     cta: "Claim deal",
     ctaHref: "/flights?promo=flash",
     badge: "Ends in 2d 14h",
-    background: "linear-gradient(135deg,#1a0a00,#3d1f00)",
+    background: "linear-gradient(135deg,#1c1508 0%,#2a1d0a 45%,#111729 100%)",
     active: true,
   },
   {
@@ -21,7 +21,7 @@ export const LIMITED_OFFERS = [
     cta: "Explore",
     ctaHref: "/hotels?promo=breakfast",
     badge: "Hotels",
-    background: "linear-gradient(135deg,#001a33,#00264d)",
+    background: "linear-gradient(135deg,#0f1a33 0%,#111729 100%)",
     active: true,
   },
   {
@@ -33,7 +33,7 @@ export const LIMITED_OFFERS = [
     cta: "Browse",
     ctaHref: "/activities?promo=weekend",
     badge: "Activities",
-    background: "linear-gradient(135deg,#0a1a00,#142b00)",
+    background: "linear-gradient(135deg,#0c1f24 0%,#111729 100%)",
     active: true,
   },
 ]
